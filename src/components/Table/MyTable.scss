@@ -1,0 +1,28 @@
+.tbl-header{
+  background-color: rgb(12, 25, 143);
+}
+.tbl-content{
+  background-color: rgb(45, 117, 199);
+  height: 100px;
+  overflow-x: auto;
+}
+
+.tableDiv{
+  padding-top: 20px;
+}
+
+table{
+  border-collapse: collapse;
+  padding-top: 50px;
+  border-spacing: 15px;
+}
+
+th, td{
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  border: 2px solid rgb(0,0,0);
+  padding: 10px;
+  text-align: center;
+}
+
+tbody tr:nth-child(odd) {
+background-color: rgb(45, 78, 187);}

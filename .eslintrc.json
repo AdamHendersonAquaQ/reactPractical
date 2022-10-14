@@ -1,0 +1,61 @@
+{
+    "parser": "C:/Users/Adam Henderson/vsCode/reactPractical/node_modules/@babel/eslint-parser",
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "module",
+        "ecmaFeatures": {
+            "jsx": true,
+            "modules": true,
+            "arrowFunctions": true,
+            "classes": true,
+            "spread": true
+        }
+    },
+    "extends": ["airbnb", "airbnb/hooks", "plugin:jsx-a11y/recommended"],
+    "plugins": ["jsx-a11y"],
+    "env": {
+        "browser": true,
+        "jest": true
+    },
+    "rules": {
+        "semi": [2, "never"],
+        "no-restricted-syntax": 0,
+        "react/jsx-filename-extension": [
+            1,
+            {
+                "extensions": [".js", ".jsx"]
+            }
+        ],
+        "comma-dangle": ["error", "never"],
+        "jsx-a11y/label-has-associated-control": [
+            2,
+            {
+                "required": {
+                    "every": ["id"]
+                }
+            }
+        ],
+        "linebreak-style": 0,
+        "no-plusplus": [
+            "error",
+            {
+                "allowForLoopAfterthoughts": true
+            }
+        ],
+        "max-len": [
+            "error",
+            {
+                "code": 150
+            }
+        ],
+        "react/no-did-update-set-state": [0],
+        "react/jsx-props-no-spreading": [0],
+        "react/jsx-no-bind": [
+            1,
+            {
+                "allowFunctions": true,
+                "allowArrowFunctions": true
+            }
+        ]
+    }
+}

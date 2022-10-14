@@ -1,0 +1,18 @@
+@import '../../utils/colours.scss';
+
+body {
+  background-color: $brand-bg;
+  color: $brand-header;
+}
+
+.brand {
+  &-page {
+    &-name{
+      color: $brand-colourA;
+    }
+    &-title{
+      color: $brand-colourB;
+    }
+  }
+  
+}
