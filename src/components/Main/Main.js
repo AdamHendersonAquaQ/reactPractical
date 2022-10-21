@@ -1,13 +1,21 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Header from '../header/Header'
-import MyTable from '../Table/MyTable'
+import MyStudentTable from '../Table/MyStudentTable'
+import MyCourseTable from '../Table/MyCourseTable'
 import './main.scss'
 
 function Main() {
+  const [isShown, setIsShown] = useState(false)
+  const handleClick = () => {
+    setIsShown((current) => !current)
+  }
   return (
     <div>
-      <Header myHeader="This is a header" />
-      <MyTable />
+      <Header myHeader="Student enrollment Service" />
+      {!isShown && <button className="swapButton" type="button" onClick={handleClick}>Show courses</button>}
+      {isShown && <button className="swapButton" type="button" onClick={handleClick}>Show students</button>}
+      {!isShown && <MyStudentTable />}
+      {isShown && <MyCourseTable />}
     </div>
   )
 }

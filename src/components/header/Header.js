@@ -9,9 +9,9 @@ export default function Header(props) {
       <h1 className="brand-page-title">
         {myHeader}
       </h1>
-      <div className="brand-page-name">
+      {/* <div className="brand-page-name">
         Department A
-      </div>
+      </div> */}
     </div>
   )
 }
