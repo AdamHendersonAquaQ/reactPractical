@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
 import './MyTable.scss'
 
@@ -45,11 +46,13 @@ export default function MyTable() {
     if (mainData.length === 0 || runEffect) {
       setRunEffect(false)
       console.log('I am a use effect hook')
+      if (filterCode !== '') setShowInput(false)
       fetch(myUrl)
         .then((response) => response.json())
         .then((data) => {
           console.log('data recieved: ', data)
           if (Object.hasOwn(data, 'status')) {
+            console.log(data)
             setMainData('error')
             setDataError(data.message)
           } else {
@@ -77,7 +80,17 @@ export default function MyTable() {
   const removeRow = (rowData) => {
     console.log('Removing row: ', rowData)
     console.log('filter: ', mainData.filter((row) => (row.courseId === rowData)))
-    setMainData(mainData.filter((row) => (row.courseId !== rowData)))
+    fetch(`${myUrl}id/${rowData}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*'
+      }
+    }).then((response) => {
+      console.log('response received: ', response)
+      if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== rowData)))
+      else console.log('Row not removed')
+    })
   }
   const updateRow = (value, rowData, field) => {
     const rowToUpdate = mainData.filter((row) => (row.courseId === rowData.courseId))
@@ -142,11 +155,16 @@ export default function MyTable() {
       }
     } else resetTable()
   }
+  const handleKeypress = (e) => {
+    if (e.charCode === 13) {
+      handleSubmit()
+    }
+  }
   const header = (
     <thead className="table-header">
-      <tr>
+      <tr key="headers">
         {headerCols.map((col) => (
-          <td>
+          <td key={col}>
             {col}
           </td>
         ))}
@@ -166,8 +184,8 @@ export default function MyTable() {
       </div>
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
         <div className="input1">
-          Enter {myFilter}:
-          <input type="text" name="entry1" value={entry1} onChange={textChange} />
+          {`Enter ${myFilter}:`}
+          <input type="text" name="entry1" value={entry1} onChange={textChange} onKeyPress={handleKeypress} />
         </div>
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
@@ -204,8 +222,8 @@ export default function MyTable() {
             <tr key={data.courseId}>
               {Object.entries(data).map(([prop, value]) => (
                 <td
+                  key={prop}
                   contentEditable={data.courseId === editingRow}
-                  field={prop}
                   onBlur={(event) => {
                     updateRow(event.target.innerHTML, data, prop)
                   }}
@@ -213,12 +231,12 @@ export default function MyTable() {
                   {value}
                 </td>
               ))}
-              <td>
+              <td key="edit">
                 <button className="tableButton" type="button" onClick={() => { setEditingRow(data.courseId) }}>
                   Edit
                 </button>
               </td>
-              <td>
+              <td key="delete">
                 <button className="tableButton" type="button" onClick={() => { removeRow(data.courseId) }}>
                   Delete
                 </button>

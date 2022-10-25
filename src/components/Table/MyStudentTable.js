@@ -152,7 +152,11 @@ export default function MyTable() {
         })
     }
   }
-
+  const handleKeypress = (e) => {
+    if (e.charCode === 13) {
+      handleSubmit()
+    }
+  }
   const header = (
     <thead className="table-header">
       <tr key="headers">
@@ -177,13 +181,13 @@ export default function MyTable() {
       </div>
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
         <div className="input1">
-          Enter {myFilter}:
-          <input type="text" name="entry1" value={entry1} onChange={textChange} />
+          {`Enter ${myFilter}:`}
+          <input type="text" name="entry1" value={entry1} onChange={textChange} onKeyPress={handleKeypress} />
         </div>
         {myFilter === 'studentName' && (
           <div className="input2">
             Enter second name:
-            <input type="text" name="entry2" value={entry2} onChange={textChange2} />
+            <input type="text" name="entry2" value={entry2} onChange={textChange2} onKeyPress={handleKeypress} />
           </div>
         )}
       </div>
@@ -223,7 +227,6 @@ export default function MyTable() {
                 <td
                   key={prop}
                   contentEditable={data.studentId === editingRow}
-                  field={prop}
                   onBlur={(event) => {
                     updateRow(event.target.innerHTML, data, prop)
                   }}

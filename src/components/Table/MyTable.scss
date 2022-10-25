@@ -1,7 +1,9 @@
 @import '../../utils/colours.scss';
 
-$background-colour:rgb(69, 203, 226);
+$background-colour:rgb(27, 164, 189);
 $content-colour: rgb(103, 174, 255);
+$hover-colour: rgb(95, 95, 255);
+$table-button-colour: rgba(34, 57, 184, 0.342);
 
 .table{
   &-header{
@@ -13,12 +15,22 @@ $content-colour: rgb(103, 174, 255);
     overflow-x: auto;
   }
   &Div{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     padding-top: 20px;
   }
   &Button{
     width: 100%;
     height: 50px;
+    background-color: $table-button-colour;
+    border-color: rgba(255, 255, 255, 0.733);
   }
+}
+
+tbody tr:hover {
+  background-color: $hover-colour
+}
+tbody tr:nth-child(odd):hover {
+  background-color: $hover-colour
 }
 
 table{
@@ -32,6 +44,8 @@ th, td{
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   border: 2px solid rgb(0,0,0);
   padding: 10px;
+  padding-left: 10px;
+  padding-right: 10px;
   text-align: center;
 }
 
@@ -61,6 +75,7 @@ input{
   &Button{
     width: 10%;
     padding-left: 10px;
+    background-color: $table-button-colour;
   }
   &Div{
     padding-left: 10px;

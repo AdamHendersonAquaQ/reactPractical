@@ -8,6 +8,14 @@
     color: black;
     text-decoration: none;
     padding: 0 10px;
+    &-selected{
+        font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+        font-size:x-large;
+        color: black;
+        text-decoration: none;
+        padding: 0 10px;
+        color: purple;
+    }
 }
 .headerlink-title:hover {
     color: red;

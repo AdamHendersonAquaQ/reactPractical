@@ -9,15 +9,12 @@ body {
   &-page {
     &-name{
       color: $brand-colourA;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+      font-size: xx-large;
     }
     &-title{
       color: $brand-colourB;
+      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
   }
-}
-
-.swapButton
-{
-  height: 50px;
-  width: 120px;
 }

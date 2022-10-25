@@ -1,32 +1,34 @@
-import { Outlet, Link, useParams } from 'react-router-dom'
-import { string } from 'prop-types'
+import { Outlet, Link, useParams, useLocation } from 'react-router-dom'
+import { bool, string } from 'prop-types'
 import React from 'react'
 
 import './Layout.scss'
 
-function HeaderLink({ page }) {
-  const newPage = (page === 'home') ? '' : page
+function HeaderLink({ page, selected }) {
   const title = page.charAt(0).toUpperCase() + page.slice(1)
   return (
-    <Link to={`/${newPage}`} className="headerlink-title">
+    <Link to={`/${page}`} className={selected ? 'headerlink-title-selected' : 'headerlink-title'}>
       {title}
     </Link>
   )
 }
 
 HeaderLink.propTypes = {
-  page: string
+  page: string,
+  selected: bool
 }
 
 HeaderLink.defaultProps = {
-  page: ''
+  page: '',
+  selected: false
 }
 export default function Layout() {
+  const location = useLocation()
   return (
     <div className="header">
-      <HeaderLink page="home" />
-      <HeaderLink page="students" />
-      <HeaderLink page="courses" />
+      <HeaderLink page="students" selected={location.pathname === '/students'} />
+      <HeaderLink page="courses" selected={location.pathname === '/courses'} />
+      <HeaderLink page="enrollment" selected={location.pathname === '/enrollment'} />
       <Outlet />
     </div>
   )
