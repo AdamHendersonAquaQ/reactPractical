@@ -67,9 +67,11 @@ input{
 
 .input{
   &1{
+    text-align: center;
     padding-left: 10px;
   }
   &2{
+    text-align: center;
     padding-left: 10px;
   }
   &Button{
@@ -80,6 +82,17 @@ input{
   &Div{
     padding-left: 10px;
   }
+  &Search{
+    &Div{
+      color: rgb(255, 0, 0);
+    }
+  }
+  &RowError{
+    background-color: rgba(255, 0, 0, 0.692);
+  }
+  &RowError:hover{
+    background-color: rgba(255, 0, 0, 0.692);
+  }
 }
 
 .resetButton{
@@ -89,8 +102,10 @@ input{
 .rowInput{
   padding-top: 10%;
   padding-bottom: 10%;
-  background-color: $content-colour;
+  background-color: rgba(255, 255, 255, 0);
+  text-align: center;
 }
+
 
 .errorDiv {
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;

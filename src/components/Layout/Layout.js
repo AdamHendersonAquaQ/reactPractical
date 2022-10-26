@@ -1,4 +1,4 @@
-import { Outlet, Link, useParams, useLocation } from 'react-router-dom'
+import { Outlet, Link, useLocation } from 'react-router-dom'
 import { bool, string } from 'prop-types'
 import React from 'react'
 

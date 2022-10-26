@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
+import header from './Shared/Header'
+import errorDiv from './Shared/Error'
 import './MyTable.scss'
 
 export default function MyTable() {
@@ -24,27 +26,33 @@ export default function MyTable() {
   const [semesterEntry, setSemesterEntry] = useState('')
   const [runEffect, setRunEffect] = useState(false)
   const [searchError, setSearchError] = useState('')
+  const [inputError, setInputError] = useState('')
   const [dataError, setDataError] = useState('')
 
-  const [courseName, setCourseName] = useState('')
-  const [subjectArea, setSubjectArea] = useState('')
-  const [creditAmount, setCreditAmount] = useState('')
-  const [studentCapacity, setStudentCapacity] = useState('')
-  const [semesterCode, setSemesterCode] = useState('')
+  const [inputCourseName, setCourseName] = useState('')
+  const [inputSubjectArea, setSubjectArea] = useState('')
+  const [inputCreditAmount, setCreditAmount] = useState('')
+  const [inputStudentCapacity, setStudentCapacity] = useState('')
+  const [inputSemesterCode, setSemesterCode] = useState('')
   const [showInput, setShowInput] = useState(true)
 
-  const filterChange = (event) => {
-    setFilterCode('')
-    setRunEffect(true)
+  const clearData = () => {
     setEntry1('')
     setSemesterEntry('')
+    setFilterCode('')
+    setRunEffect(true)
+  }
+  const filterChange = (event) => {
+    clearData()
     setMyFilter(event.target.value)
     setSearchError('')
   }
   const textChange = (event) => {
+    setInputError('')
     setEntry1(event.target.value)
   }
   const semesterTextChange = (event) => {
+    setInputError('')
     setSemesterEntry(event.target.value)
   }
   useEffect(() => {
@@ -93,7 +101,7 @@ export default function MyTable() {
       }
     }).then((response) => {
       console.log('response received: ', response)
-      if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== rowData)))
+      if (response.ok) setMainData(mainData.filter((row) => (row.studentId === rowData)))
       else console.log('Row not removed')
     })
   }
@@ -118,13 +126,16 @@ export default function MyTable() {
     })
   }
   const register = () => {
-    if (courseName !== '' && subjectArea !== '' && !Number.isNaN(parseInt(creditAmount, 10) && !Number.isNaN(parseInt(studentCapacity, 10)))) {
+    if (inputCourseName !== ''
+    && inputSubjectArea !== ''
+    && !Number.isNaN(parseInt(inputCreditAmount, 10)
+    && !Number.isNaN(parseInt(inputStudentCapacity, 10)))) {
       const jsonData = {
-        "courseName": courseName,
-        "subjectArea": subjectArea,
-        "creditAmount": creditAmount,
-        "studentCapacity": studentCapacity,
-        "semesterCode": semesterCode
+        courseName: inputCourseName,
+        subjectArea: inputSubjectArea,
+        creditAmount: inputCreditAmount,
+        studentCapacity: inputStudentCapacity,
+        semesterCode: inputSemesterCode
       }
       fetch(myUrl, {
         method: 'POST',
@@ -135,20 +146,19 @@ export default function MyTable() {
       }).then((response) => response.json())
         .then((data) => {
           console.log('data received: ', data)
-          setRunEffect(true)
-          setCourseName('')
-          setSubjectArea('')
-          setCreditAmount('')
-          setStudentCapacity('')
-          setSemesterCode('')
+          if (!Object.hasOwn(data, 'message')) {
+            setRunEffect(true)
+            setCourseName('')
+            setSubjectArea('')
+            setCreditAmount('')
+            setStudentCapacity('')
+            setSemesterCode('')
+          } else setInputError(data.message)
         })
     }
   }
   const resetTable = () => {
-    setEntry1('')
-    setSemesterEntry('')
-    setFilterCode('')
-    setRunEffect(true)
+    clearData()
     setShowInput(true)
   }
   const handleSubmit = () => {
@@ -171,17 +181,7 @@ export default function MyTable() {
       handleSubmit()
     }
   }
-  const header = (
-    <thead className="table-header">
-      <tr key="headers">
-        {headerCols.map((col) => (
-          <td key={col}>
-            {col}
-          </td>
-        ))}
-      </tr>
-    </thead>
-  )
+
   const filter = (
     <div className="filterDiv" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="selectDiv">
@@ -207,21 +207,17 @@ export default function MyTable() {
         )}
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
-      {searchError !== '' && (
-        <div className="inputSearchDiv">
-          {searchError}
-        </div>
-      )}
+      {errorDiv(searchError)}
     </div>
   )
   const inputRow = (
-    <tr key="input">
+    <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
       <td key="id" />
-      <td><input key="courseName" className="rowInput" type="text" value={courseName} onChange={courseNameChange} /></td>
-      <td><input key="subjectArea" className="rowInput" type="text" value={subjectArea} onChange={subjectAreaChange} /></td>
-      <td><input key="creditAmount" className="rowInput" type="text" value={creditAmount} onChange={creditAmountChange} /></td>
-      <td><input key="studentCapacity" className="rowInput" type="text" value={studentCapacity} onChange={studentCapacityChange} /></td>
-      <td><input key="semesterCode" className="rowInput" type="text" value={semesterCode} onChange={semesterCodeChange} /></td>
+      <td><input key="courseName" className="rowInput" type="text" value={inputCourseName} onChange={courseNameChange} /></td>
+      <td><input key="subjectArea" className="rowInput" type="text" value={inputSubjectArea} onChange={subjectAreaChange} /></td>
+      <td><input key="creditAmount" className="rowInput" type="number" value={inputCreditAmount} onChange={creditAmountChange} /></td>
+      <td><input key="studentCapacity" className="rowInput" type="number" value={inputStudentCapacity} onChange={studentCapacityChange} /></td>
+      <td><input key="semesterCode" className="rowInput" type="text" value={inputSemesterCode} onChange={semesterCodeChange} /></td>
       <td key="register">
         <button className="tableButton" type="submit" onClick={() => { register() }}>
           Register
@@ -234,7 +230,7 @@ export default function MyTable() {
       <h1>Course Table</h1>
       {filter}
       <table className="tbl">
-        {header}
+        {header(headerCols)}
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
             <tr key={data.courseId}>
@@ -242,9 +238,7 @@ export default function MyTable() {
                 <td
                   key={prop}
                   contentEditable={data.courseId === editingRow}
-                  onBlur={(event) => {
-                    updateRow(event.target.innerHTML, data, prop)
-                  }}
+                  onBlur={(event) => { updateRow(event.target.innerHTML, data, prop) }}
                 >
                   {value}
                 </td>
@@ -264,11 +258,8 @@ export default function MyTable() {
           {showInput && inputRow}
         </tbody>
       </table>
-      {dataError !== '' && (
-        <div className="errorDiv">
-          {dataError}
-        </div>
-      )}
+      {errorDiv(inputError)}
+      {errorDiv(dataError)}
     </div>
   )
 }

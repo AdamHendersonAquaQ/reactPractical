@@ -1,5 +1,7 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
+import header from './Shared/Header'
+import errorDiv from './Shared/Error'
 import './MyTable.scss'
 
 export default function MyTable() {
@@ -21,18 +23,22 @@ export default function MyTable() {
   const [entry2, setEntry2] = useState('')
   const [runEffect, setRunEffect] = useState(false)
   const [searchError, setSearchError] = useState('')
+  const [inputError, setInputError] = useState('')
   const [dataError, setDataError] = useState('')
 
-  const [firstName, setFirstName] = useState('')
-  const [lastName, setLastName] = useState('')
-  const [graduationYear, setGraduationYear] = useState('')
+  const [inputFirstName, setFirstName] = useState('')
+  const [inputLastName, setLastName] = useState('')
+  const [inputGraduationYear, setGraduationYear] = useState('')
   const [showInput, setShowInput] = useState(true)
 
-  const filterChange = (event) => {
-    setFilterCode('')
-    setRunEffect(true)
+  const clearData = () => {
     setEntry1('')
     setEntry2('')
+    setFilterCode('')
+    setRunEffect(true)
+  }
+  const filterChange = (event) => {
+    clearData()
     setMyFilter(event.target.value)
     setSearchError('')
   }
@@ -44,12 +50,15 @@ export default function MyTable() {
   }
 
   const firstNameChange = (event) => {
+    setInputError('')
     setFirstName(event.target.value)
   }
   const lastNameChange = (event) => {
+    setInputError('')
     setLastName(event.target.value)
   }
   const graduationYearChange = (event) => {
+    setInputError('')
     setGraduationYear(event.target.value)
   }
 
@@ -109,10 +118,7 @@ export default function MyTable() {
     })
   }
   const resetTable = () => {
-    setEntry1('')
-    setEntry2('')
-    setFilterCode('')
-    setRunEffect(true)
+    clearData()
     setShowInput(true)
   }
   const handleSubmit = () => {
@@ -120,21 +126,20 @@ export default function MyTable() {
     if (entry1 !== '') {
       if (myFilter === 'id' && Number.isNaN(parseInt(entry1, 10))) setSearchError('Error: Id field must be an integer.  ')
       else {
-        if (myFilter !== 'studentName') {
-          setFilterCode(`${myFilter}/${entry1}`)
-        } else {
-          setFilterCode(`${myFilter}/?firstName=${entry1}&lastName=${entry2}`)
-        }
+        const tempFilterCode = (myFilter !== 'studentName') ? `${myFilter}/${entry1}` : `${myFilter}/?firstName=${entry1}&lastName=${entry2}`
+        setFilterCode(tempFilterCode)
         setRunEffect(true)
       }
     } else resetTable()
   }
   const register = () => {
-    if (firstName !== '' && Number.isNaN(parseInt(graduationYear, 10))) {
+    console.log(inputFirstName !== '')
+    console.log(Number.isNaN(parseInt(inputGraduationYear, 10)))
+    if (inputFirstName !== '' && !Number.isNaN(parseInt(inputGraduationYear, 10))) {
       const jsonData = {
-        "firstName": firstName,
-        "lastName": lastName,
-        "graduationYear": graduationYear
+        firstName: inputFirstName,
+        lastName: inputLastName,
+        graduationYear: inputGraduationYear
       }
       fetch(myUrl, {
         method: 'POST',
@@ -144,11 +149,13 @@ export default function MyTable() {
         body: JSON.stringify(jsonData)
       }).then((response) => response.json())
         .then((data) => {
-          console.log('data received: ', data)
-          setRunEffect(true)
-          setFirstName('')
-          setLastName('')
-          setGraduationYear('')
+          if (!Object.hasOwn(data, 'message')) {
+            console.log('data received: ', data)
+            setRunEffect(true)
+            setFirstName('')
+            setLastName('')
+            setGraduationYear('')
+          } else setInputError(data.message)
         })
     }
   }
@@ -157,17 +164,6 @@ export default function MyTable() {
       handleSubmit()
     }
   }
-  const header = (
-    <thead className="table-header">
-      <tr key="headers">
-        {headerCols.map((col) => (
-          <td key={col}>
-            {col}
-          </td>
-        ))}
-      </tr>
-    </thead>
-  )
 
   const filter = (
     <div className="filterDiv" style={{ display: 'flex', flexDirection: 'row' }}>
@@ -192,20 +188,16 @@ export default function MyTable() {
         )}
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
-      {searchError !== '' && (
-        <div className="inputSearchDiv">
-          {searchError}
-        </div>
-      )}
+      {errorDiv(searchError)}
     </div>
   )
 
   const inputRow = (
-    <tr key="input">
+    <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
       <td key="id" />
-      <td><input key="firstName" className="rowInput" type="text" value={firstName} onChange={firstNameChange} /></td>
-      <td><input key="lastName" className="rowInput" type="text" value={lastName} onChange={lastNameChange} /></td>
-      <td><input key="graduationYear" className="rowInput" type="text" value={graduationYear} onChange={graduationYearChange} /></td>
+      <td><input key="firstName" className="rowInput" type="text" value={inputFirstName} onChange={firstNameChange} /></td>
+      <td><input key="lastName" className="rowInput" type="text" value={inputLastName} onChange={lastNameChange} /></td>
+      <td><input key="graduationYear" className="rowInput" type="number" value={inputGraduationYear} onChange={graduationYearChange} /></td>
       <td key="register">
         <button className="tableButton" type="submit" onClick={() => { register() }}>
           Register
@@ -219,7 +211,7 @@ export default function MyTable() {
       <h1>Student Table</h1>
       {filter}
       <table className="tbl">
-        {header}
+        {header(headerCols)}
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
             <tr key={data.studentId}>
@@ -227,9 +219,7 @@ export default function MyTable() {
                 <td
                   key={prop}
                   contentEditable={data.studentId === editingRow}
-                  onBlur={(event) => {
-                    updateRow(event.target.innerHTML, data, prop)
-                  }}
+                  onBlur={(event) => { updateRow(event.target.innerHTML, data, prop) }}
                 >
                   {value}
                 </td>
@@ -238,9 +228,7 @@ export default function MyTable() {
                 <button
                   className="tableButton"
                   type="button"
-                  onClick={() => {
-                    setEditingRow(data.studentId)
-                  }}
+                  onClick={() => { setEditingRow(data.studentId) }}
                 >
                   Edit
                 </button>
@@ -255,11 +243,8 @@ export default function MyTable() {
           {showInput && inputRow}
         </tbody>
       </table>
-      {dataError !== '' && (
-        <div className="errorDiv">
-          {dataError}
-        </div>
-      )}
+      {errorDiv(inputError)}
+      {errorDiv(dataError)}
     </div>
   )
 }

@@ -1,4 +1,7 @@
+/* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
+import header from './Shared/Header'
+import errorDiv from './Shared/Error'
 import './MyTable.scss'
 
 export default function MyTable() {
@@ -19,16 +22,20 @@ export default function MyTable() {
   const [entry1, setEntry1] = useState('')
   const [runEffect, setRunEffect] = useState(false)
   const [searchError, setSearchError] = useState('')
+  const [inputError, setInputError] = useState('')
   const [dataError, setDataError] = useState('')
 
   const [studentId, setStudentId] = useState('')
   const [courseId, setCourseId] = useState('')
   const [showInput, setShowInput] = useState(true)
 
-  const filterChange = (event) => {
+  const clearData = () => {
+    setEntry1('')
     setFilterCode('')
     setRunEffect(true)
-    setEntry1('')
+  }
+  const filterChange = (event) => {
+    clearData()
     setMyFilter(event.target.value)
     setSearchError('')
   }
@@ -53,11 +60,13 @@ export default function MyTable() {
           }
         })
     }
-  }, [mainData.length, runEffect, myUrl])
+  }, [mainData.length, runEffect, myUrl, filterCode])
   const studentIdChange = (event) => {
+    setInputError('')
     setStudentId(event.target.value)
   }
   const courseIdChange = (event) => {
+    setInputError('')
     setCourseId(event.target.value)
   }
   const removeRow = (studentIdData, courseIdData) => {
@@ -81,18 +90,23 @@ export default function MyTable() {
         headers: {
           'Content-Type': 'application/json'
         }
-      }).then((response) => {
-        console.log('response received: ', response)
-        setRunEffect(true)
-        setStudentId('')
-        setCourseId('')
-      })
+      }).then((response) => response.json())
+        .then((data) => {
+          console.log('data received: ', data)
+          setInputError(data.message)
+        })
+        .catch((error) => {
+          if (error.toString().substring(0, 46) === ('SyntaxError: Unexpected token \'S\', "Student ha')) {
+            console.log('Student added succesfully')
+            setRunEffect(true)
+            setStudentId('')
+            setCourseId('')
+          }
+        })
     }
   }
   const resetTable = () => {
-    setEntry1('')
-    setFilterCode('')
-    setRunEffect(true)
+    clearData()
     setShowInput(true)
   }
   const handleSubmit = () => {
@@ -110,17 +124,7 @@ export default function MyTable() {
       handleSubmit()
     }
   }
-  const header = (
-    <thead className="table-header">
-      <tr key="headers">
-        {headerCols.map((col) => (
-          <td key={col}>
-            {col}
-          </td>
-        ))}
-      </tr>
-    </thead>
-  )
+
   const filter = (
     <div className="filterDiv" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="selectDiv">
@@ -137,19 +141,15 @@ export default function MyTable() {
         </div>
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
-      {searchError !== '' && (
-        <div className="inputSearchDiv">
-          {searchError}
-        </div>
-      )}
+      {errorDiv(searchError)}
     </div>
   )
   const inputRow = (
-    <tr key="input">
-      <td><input key="studentId" className="rowInput" type="text" value={studentId} onChange={studentIdChange} /></td>
+    <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
+      <td><input key="studentId" className="rowInput" type="number" value={studentId} onChange={studentIdChange} /></td>
       <td key="firstName" />
       <td key="lastName" />
-      <td><input key="courseId" className="rowInput" type="text" value={courseId} onChange={courseIdChange} /></td>
+      <td><input key="courseId" className="rowInput" type="number" value={courseId} onChange={courseIdChange} /></td>
       <td key="courseName" />
       <td key="register">
         <button className="tableButton" type="submit" onClick={() => { register() }}>
@@ -163,7 +163,7 @@ export default function MyTable() {
       <h1>Enrollment Table</h1>
       {filter}
       <table className="tbl">
-        {header}
+        {header(headerCols)}
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
             <tr key={`${data.studentId} ${data.courseId}`}>
@@ -182,11 +182,8 @@ export default function MyTable() {
           {showInput && inputRow}
         </tbody>
       </table>
-      {dataError !== '' && (
-        <div className="errorDiv">
-          {dataError}
-        </div>
-      )}
+      {errorDiv(inputError)}
+      {errorDiv(dataError)}
     </div>
   )
 }
