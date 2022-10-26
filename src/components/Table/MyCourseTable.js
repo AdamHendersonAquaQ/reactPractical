@@ -21,6 +21,7 @@ export default function MyTable() {
   const myUrl = `http://localhost:8080/api/${siteCode}${filterCode}`
   const [myFilter, setMyFilter] = useState('id')
   const [entry1, setEntry1] = useState('')
+  const [semesterEntry, setSemesterEntry] = useState('')
   const [runEffect, setRunEffect] = useState(false)
   const [searchError, setSearchError] = useState('')
   const [dataError, setDataError] = useState('')
@@ -36,11 +37,15 @@ export default function MyTable() {
     setFilterCode('')
     setRunEffect(true)
     setEntry1('')
+    setSemesterEntry('')
     setMyFilter(event.target.value)
     setSearchError('')
   }
   const textChange = (event) => {
     setEntry1(event.target.value)
+  }
+  const semesterTextChange = (event) => {
+    setSemesterEntry(event.target.value)
   }
   useEffect(() => {
     if (mainData.length === 0 || runEffect) {
@@ -61,7 +66,7 @@ export default function MyTable() {
           }
         })
     }
-  }, [mainData.length, runEffect, myUrl])
+  }, [mainData.length, runEffect, myUrl, filterCode])
   const courseNameChange = (event) => {
     setCourseName(event.target.value)
   }
@@ -141,6 +146,7 @@ export default function MyTable() {
   }
   const resetTable = () => {
     setEntry1('')
+    setSemesterEntry('')
     setFilterCode('')
     setRunEffect(true)
     setShowInput(true)
@@ -148,9 +154,14 @@ export default function MyTable() {
   const handleSubmit = () => {
     setSearchError('')
     if (entry1 !== '') {
-      if (myFilter === 'id' && Number.isNaN(parseInt(entry1, 10))) setSearchError('Error: Id field must be an integer.  ')
-      else {
-        setFilterCode(`${myFilter}/${entry1}`)
+      if ((myFilter === 'id' || myFilter === 'semester') && Number.isNaN(parseInt(entry1, 10))) {
+        setSearchError('Error: Id field must be an integer.  ')
+      } else {
+        if (myFilter === 'studentId') {
+          setFilterCode(`studentSemester/?studentId=${entry1}&semesterCode=${semesterEntry}`)
+        } else {
+          setFilterCode(`${myFilter}/${entry1}`)
+        }
         setRunEffect(true)
       }
     } else resetTable()
@@ -180,6 +191,7 @@ export default function MyTable() {
           <option value="name">Name</option>
           <option value="semester">Semester Code</option>
           <option value="subject">Subject Area</option>
+          <option value="studentId">Student Semester</option>
         </select>
       </div>
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
@@ -187,6 +199,12 @@ export default function MyTable() {
           {`Enter ${myFilter}:`}
           <input type="text" name="entry1" value={entry1} onChange={textChange} onKeyPress={handleKeypress} />
         </div>
+        {myFilter === 'studentId' && (
+          <div className="input2">
+            Enter Semester code
+            <input type="text" name="semesterEntry" value={semesterEntry} onChange={semesterTextChange} onKeyPress={handleKeypress} />
+          </div>
+        )}
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
       {searchError !== '' && (
