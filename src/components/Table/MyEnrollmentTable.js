@@ -15,9 +15,15 @@ export default function MyTable() {
   ]
 
   const [mainData, setMainData] = useState([])
+  const [studentData, setStudentData] = useState([])
+  const [courseData, setCourseData] = useState([])
+
   const siteCode = 'enrollment/'
   const [filterCode, setFilterCode] = useState('')
   const myUrl = `http://localhost:8080/api/${siteCode}${filterCode}`
+  const myStudentUrl = 'http://localhost:8080/api/student/'
+  const myCourseUrl = 'http://localhost:8080/api/course'
+
   const [myFilter, setMyFilter] = useState('student')
   const [entry1, setEntry1] = useState('')
   const [runEffect, setRunEffect] = useState(false)
@@ -26,7 +32,10 @@ export default function MyTable() {
   const [dataError, setDataError] = useState('')
 
   const [studentId, setStudentId] = useState('')
+  const [inputFirstName, setFirstName] = useState('')
+  const [inputLastName, setLastName] = useState('')
   const [courseId, setCourseId] = useState('')
+  const [inputCourseName, setCourseName] = useState('')
   const [showInput, setShowInput] = useState(true)
 
   const clearData = () => {
@@ -60,12 +69,41 @@ export default function MyTable() {
           }
         })
     }
-  }, [mainData.length, runEffect, myUrl, filterCode])
+    if (studentData.length === 0) {
+      fetch(myStudentUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('student data recieved: ', data)
+          if (Object.hasOwn(data, 'status')) {
+            setStudentData('error')
+          } else {
+            setStudentData(data)
+          }
+        })
+    }
+    if (courseData.length === 0) {
+      fetch(myCourseUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log('course data recieved: ', data)
+          if (Object.hasOwn(data, 'status')) {
+            setCourseData('error')
+          } else {
+            setCourseData(data)
+          }
+        })
+    }
+  }, [mainData.length, runEffect, myUrl, filterCode, studentData.length, courseData.length])
   const studentIdChange = (event) => {
+    const rowToUpdate = studentData.filter((row) => (row.studentId === parseInt(event.target.value, 10)))
+    setFirstName(rowToUpdate[0].firstName)
+    setLastName(rowToUpdate[0].lastName)
     setInputError('')
     setStudentId(event.target.value)
   }
   const courseIdChange = (event) => {
+    const rowToUpdate = courseData.filter((row) => (row.courseId === parseInt(event.target.value, 10)))
+    setCourseName(rowToUpdate[0].courseName)
     setInputError('')
     setCourseId(event.target.value)
   }
@@ -101,6 +139,9 @@ export default function MyTable() {
             setRunEffect(true)
             setStudentId('')
             setCourseId('')
+            setFirstName('')
+            setLastName('')
+            setCourseName('')
           }
         })
     }
@@ -146,11 +187,21 @@ export default function MyTable() {
   )
   const inputRow = (
     <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
-      <td><input key="studentId" className="rowInput" type="number" value={studentId} onChange={studentIdChange} /></td>
-      <td key="firstName" />
-      <td key="lastName" />
-      <td><input key="courseId" className="rowInput" type="number" value={courseId} onChange={courseIdChange} /></td>
-      <td key="courseName" />
+      <td>
+        <select className="inputSelect" value={studentId} onChange={studentIdChange}>
+          <option value="" />
+          {studentData.map((data) => <option key={data.studentId} value={data.studentId}>{data.studentId}</option>)}
+        </select>
+      </td>
+      <td><input key="firstName" className="rowInput" disabled value={inputFirstName} /></td>
+      <td><input key="lastName" className="rowInput" disabled value={inputLastName} /></td>
+      <td>
+        <select className="inputSelect" value={courseId} onChange={courseIdChange}>
+          <option value="" />
+          {courseData.map((data) => <option key={data.courseId} value={data.courseId}>{data.courseId}</option>)}
+        </select>
+      </td>
+      <td><input key="courseName" className="rowInput" disabled value={inputCourseName} /></td>
       <td key="register">
         <button className="tableButton" type="submit" onClick={() => { register() }}>
           Register
@@ -173,7 +224,11 @@ export default function MyTable() {
                 </td>
               ))}
               <td key="delete">
-                <button className="tableButton" type="button" onClick={() => { removeRow(data.studentId, data.courseId) }}>
+                <button
+                  className="tableButton"
+                  type="button"
+                  onClick={() => { if (window.confirm('Are you sure you want to delete this item?')) removeRow(data.studentId, data.courseId) }}
+                >
                   Delete
                 </button>
               </td>

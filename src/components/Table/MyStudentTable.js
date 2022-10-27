@@ -135,7 +135,7 @@ export default function MyTable() {
   const register = () => {
     console.log(inputFirstName !== '')
     console.log(Number.isNaN(parseInt(inputGraduationYear, 10)))
-    if (inputFirstName !== '' && !Number.isNaN(parseInt(inputGraduationYear, 10))) {
+    if (inputFirstName !== '') {
       const jsonData = {
         firstName: inputFirstName,
         lastName: inputLastName,
@@ -157,7 +157,7 @@ export default function MyTable() {
             setGraduationYear('')
           } else setInputError(data.message)
         })
-    }
+    } else setInputError('First name cannot be left blank')
   }
   const handleKeypress = (e) => {
     if (e.charCode === 13) {
@@ -197,7 +197,16 @@ export default function MyTable() {
       <td key="id" />
       <td><input key="firstName" className="rowInput" type="text" value={inputFirstName} onChange={firstNameChange} /></td>
       <td><input key="lastName" className="rowInput" type="text" value={inputLastName} onChange={lastNameChange} /></td>
-      <td><input key="graduationYear" className="rowInput" type="number" value={inputGraduationYear} onChange={graduationYearChange} /></td>
+      <td>
+        <input
+          key="graduationYear"
+          className="rowInput"
+          type="number"
+          min={new Date().getFullYear()}
+          value={inputGraduationYear}
+          onChange={graduationYearChange}
+        />
+      </td>
       <td key="register">
         <button className="tableButton" type="submit" onClick={() => { register() }}>
           Register
@@ -219,7 +228,18 @@ export default function MyTable() {
                 <td
                   key={prop}
                   contentEditable={data.studentId === editingRow}
-                  onBlur={(event) => { updateRow(event.target.innerHTML, data, prop) }}
+                  onBlur={
+                    (event) => {
+                      const rowToUpdate = mainData.filter((row) => (row.studentId === data.studentId))
+                      const ogVal = rowToUpdate[0][prop]
+                      if (window.confirm('Are you sure you want to make these changes?')) {
+                        updateRow(event.target.innerHTML, data, prop)
+                      } else {
+                        setEditingRow([])
+                        rowToUpdate[0][prop] = `${ogVal} `
+                      }
+                    }
+                }
                 >
                   {value}
                 </td>
@@ -234,7 +254,11 @@ export default function MyTable() {
                 </button>
               </td>
               <td key="delete">
-                <button className="tableButton" type="button" onClick={() => { removeRow(data.studentId) }}>
+                <button
+                  className="tableButton"
+                  type="button"
+                  onClick={() => { if (window.confirm('Are you sure you want to delete this item?')) removeRow(data.studentId) }}
+                >
                   Delete
                 </button>
               </td>
