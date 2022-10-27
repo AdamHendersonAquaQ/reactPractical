@@ -10,10 +10,11 @@ body {
     &-name{
       color: $brand-colourA;
       font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-      font-size: xx-large;
+      font-size: large;
     }
     &-title{
       color: $brand-colourB;
+      font-size: x-large;
       font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     }
   }

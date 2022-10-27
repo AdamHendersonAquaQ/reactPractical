@@ -122,7 +122,7 @@ export default function MyTable() {
     })
   }
   const register = () => {
-    if (courseId !== '' && studentId !== '' && !Number.isNaN(parseInt(studentId, 10) && !Number.isNaN(parseInt(courseId, 10)))) {
+    if (courseId !== '' && studentId !== '') {
       fetch(`${myUrl}?studentId=${studentId}&courseId=${courseId}`, {
         method: 'POST',
         headers: {
@@ -137,6 +137,7 @@ export default function MyTable() {
           if (error.toString().substring(0, 46) === ('SyntaxError: Unexpected token \'S\', "Student ha')) {
             console.log('Student added succesfully')
             setRunEffect(true)
+            setInputError('')
             setStudentId('')
             setCourseId('')
             setFirstName('')
@@ -144,7 +145,7 @@ export default function MyTable() {
             setCourseName('')
           }
         })
-    }
+    } else setInputError('Please select a courseId and studentId')
   }
   const resetTable = () => {
     clearData()
@@ -190,7 +191,11 @@ export default function MyTable() {
       <td>
         <select className="inputSelect" value={studentId} onChange={studentIdChange}>
           <option value="" />
-          {studentData.map((data) => <option key={data.studentId} value={data.studentId}>{data.studentId}</option>)}
+          {studentData.map((data) => (
+            <option key={data.studentId} value={data.studentId}>
+              {`${data.studentId} - ${data.firstName} ${data.lastName}`}
+            </option>
+          ))}
         </select>
       </td>
       <td><input key="firstName" className="rowInput" disabled value={inputFirstName} /></td>
@@ -198,7 +203,7 @@ export default function MyTable() {
       <td>
         <select className="inputSelect" value={courseId} onChange={courseIdChange}>
           <option value="" />
-          {courseData.map((data) => <option key={data.courseId} value={data.courseId}>{data.courseId}</option>)}
+          {courseData.map((data) => <option key={data.courseId} value={data.courseId}>{`${data.courseId} - ${data.courseName}`}</option>)}
         </select>
       </td>
       <td><input key="courseName" className="rowInput" disabled value={inputCourseName} /></td>
@@ -211,7 +216,7 @@ export default function MyTable() {
   )
   return (
     <div className="tableDiv">
-      <h1>Enrollment Table</h1>
+      <h2>Enrollment Table</h2>
       {filter}
       <table className="tbl">
         {header(headerCols)}

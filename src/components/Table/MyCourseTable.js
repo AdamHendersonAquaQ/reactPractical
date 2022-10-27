@@ -228,7 +228,7 @@ export default function MyTable() {
   )
   return (
     <div className="tableDiv">
-      <h1>Course Table</h1>
+      <h2>Course Table</h2>
       {filter}
       <table className="tbl">
         {header(headerCols)}
@@ -262,7 +262,7 @@ export default function MyTable() {
                 <button
                   className="tableButton"
                   type="button"
-                  onClick={() => { if (window.confirm('Are you sure you want to delete this item?')) removeRow(data.studentId) }}
+                  onClick={() => { if (window.confirm('Are you sure you want to delete this item?')) removeRow(data.courseId) }}
                 >
                   Delete
                 </button>

@@ -123,7 +123,7 @@ export default function MyTable() {
   }
   const handleSubmit = () => {
     setSearchError('')
-    if (entry1 !== '') {
+    if ((entry1 !== '') || (myFilter === 'studentName' && entry2 !== '')) {
       if (myFilter === 'id' && Number.isNaN(parseInt(entry1, 10))) setSearchError('Error: Id field must be an integer.  ')
       else {
         const tempFilterCode = (myFilter !== 'studentName') ? `${myFilter}/${entry1}` : `${myFilter}/?firstName=${entry1}&lastName=${entry2}`
@@ -217,7 +217,7 @@ export default function MyTable() {
 
   return (
     <div className="tableDiv">
-      <h1>Student Table</h1>
+      <h2>Student Table</h2>
       {filter}
       <table className="tbl">
         {header(headerCols)}
