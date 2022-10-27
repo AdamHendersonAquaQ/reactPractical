@@ -25,6 +25,8 @@ function Main() {
           </Route>
         </Routes>
       </BrowserRouter>
+      <br />
+      <br />
     </div>
   )
 }
