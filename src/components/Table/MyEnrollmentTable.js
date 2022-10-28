@@ -95,15 +95,19 @@ export default function MyTable() {
     }
   }, [mainData.length, runEffect, myUrl, filterCode, studentData.length, courseData.length])
   const studentIdChange = (event) => {
-    const rowToUpdate = studentData.filter((row) => (row.studentId === parseInt(event.target.value, 10)))
-    setFirstName(rowToUpdate[0].firstName)
-    setLastName(rowToUpdate[0].lastName)
+    if (studentData !== 'error') {
+      const rowToUpdate = studentData.filter((row) => (row.studentId === parseInt(event.target.value, 10)))
+      setFirstName(rowToUpdate[0].firstName)
+      setLastName(rowToUpdate[0].lastName)
+    }
     setInputError('')
     setStudentId(event.target.value)
   }
   const courseIdChange = (event) => {
-    const rowToUpdate = courseData.filter((row) => (row.courseId === parseInt(event.target.value, 10)))
-    setCourseName(rowToUpdate[0].courseName)
+    if (courseData !== 'error') {
+      const rowToUpdate = courseData.filter((row) => (row.courseId === parseInt(event.target.value, 10)))
+      setCourseName(rowToUpdate[0].courseName)
+    }
     setInputError('')
     setCourseId(event.target.value)
   }
@@ -117,7 +121,7 @@ export default function MyTable() {
       }
     }).then((response) => {
       console.log('response received: ', response)
-      if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== studentIdData && row.courseId !== courseIdData)))
+      if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== studentIdData || row.courseId !== courseIdData)))
       else console.log('Row not removed')
     })
   }
@@ -189,6 +193,7 @@ export default function MyTable() {
   const inputRow = (
     <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
       <td>
+        {studentData !== 'error' && (
         <select className="inputSelect" value={studentId} onChange={studentIdChange}>
           <option value="" />
           {studentData.map((data) => (
@@ -197,14 +202,19 @@ export default function MyTable() {
             </option>
           ))}
         </select>
+        )}
+        {studentData === 'error' && (<input key="studentName" className="rowInput" value={studentId} onChange={studentIdChange} />)}
       </td>
       <td><input key="firstName" className="rowInput" disabled value={inputFirstName} /></td>
       <td><input key="lastName" className="rowInput" disabled value={inputLastName} /></td>
       <td>
+        {courseData !== 'error' && (
         <select className="inputSelect" value={courseId} onChange={courseIdChange}>
           <option value="" />
           {courseData.map((data) => <option key={data.courseId} value={data.courseId}>{`${data.courseId} - ${data.courseName}`}</option>)}
         </select>
+        )}
+        {courseData === 'error' && (<input key="courseName" className="rowInput" value={courseId} onChange={courseIdChange} />)}
       </td>
       <td><input key="courseName" className="rowInput" disabled value={inputCourseName} /></td>
       <td key="register">

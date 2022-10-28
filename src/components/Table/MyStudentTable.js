@@ -81,6 +81,7 @@ export default function MyTable() {
         })
     }
   }, [mainData.length, runEffect, myUrl, filterCode])
+
   const removeRow = (rowData) => {
     console.log('Removing row: ', rowData)
     console.log('filter: ', mainData.filter((row) => (row.studentId === rowData)))
