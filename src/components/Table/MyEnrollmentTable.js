@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
+import { string } from 'prop-types'
 import header from './Shared/Header'
 import errorDiv from './Shared/Error'
 import './MyTable.scss'
 
-export default function MyTable() {
+export default function MyTable({ id }) {
   const headerCols = [
     'StudentID',
     'First Name',
@@ -24,7 +25,7 @@ export default function MyTable() {
   const myStudentUrl = 'http://localhost:8080/api/student/'
   const myCourseUrl = 'http://localhost:8080/api/course'
 
-  const [myFilter, setMyFilter] = useState('student')
+  const [myFilter, setMyFilter] = useState('course')
   const [entry1, setEntry1] = useState('')
   const [runEffect, setRunEffect] = useState(false)
   const [searchError, setSearchError] = useState('')
@@ -52,11 +53,45 @@ export default function MyTable() {
     setEntry1(event.target.value)
   }
   useEffect(() => {
-    if (mainData.length === 0 || runEffect) {
+    if (id === 'noId') {
+      if (mainData.length === 0 || runEffect) {
+        setRunEffect(false)
+        console.log('I am a use effect hook')
+        if (filterCode !== '') setShowInput(false)
+        fetch(myUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('data recieved: ', data)
+            if (Object.hasOwn(data, 'status')) {
+              setMainData('error')
+              setDataError(data.message)
+            } else {
+              setMainData(data)
+              setDataError('')
+            }
+          })
+      }
+      if (studentData.length === 0) {
+        fetch(myStudentUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log('student data recieved: ', data)
+            if (Object.hasOwn(data, 'status')) {
+              setStudentData('error')
+            } else {
+              setStudentData(data)
+            }
+          })
+      }
+    } else if (mainData.length === 0 || runEffect) {
       setRunEffect(false)
       console.log('I am a use effect hook')
-      if (filterCode !== '') setShowInput(false)
-      fetch(myUrl)
+      let url = ''
+      if (filterCode !== '') {
+        setShowInput(false)
+        url = `http://localhost:8080/api/${siteCode}record/?studentId=${id}&${filterCode.replace('/', 'Id=')}`
+      } else { url = `${myUrl}student/${id}` }
+      fetch(url)
         .then((response) => response.json())
         .then((data) => {
           console.log('data recieved: ', data)
@@ -66,18 +101,7 @@ export default function MyTable() {
           } else {
             setMainData(data)
             setDataError('')
-          }
-        })
-    }
-    if (studentData.length === 0) {
-      fetch(myStudentUrl)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('student data recieved: ', data)
-          if (Object.hasOwn(data, 'status')) {
-            setStudentData('error')
-          } else {
-            setStudentData(data)
+            setStudentId(id)
           }
         })
     }
@@ -93,21 +117,25 @@ export default function MyTable() {
           }
         })
     }
-  }, [mainData.length, runEffect, myUrl, filterCode, studentData.length, courseData.length])
+  }, [mainData.length, runEffect, myUrl, filterCode, studentData.length, courseData.length, id])
+
   const studentIdChange = (event) => {
-    if (studentData !== 'error') {
+    if (studentData !== 'error' && event.target.value !== '') {
       const rowToUpdate = studentData.filter((row) => (row.studentId === parseInt(event.target.value, 10)))
       setFirstName(rowToUpdate[0].firstName)
       setLastName(rowToUpdate[0].lastName)
+    } else {
+      setFirstName('')
+      setLastName('')
     }
     setInputError('')
     setStudentId(event.target.value)
   }
   const courseIdChange = (event) => {
-    if (courseData !== 'error') {
+    if (courseData !== 'error' && event.target.value !== '') {
       const rowToUpdate = courseData.filter((row) => (row.courseId === parseInt(event.target.value, 10)))
       setCourseName(rowToUpdate[0].courseName)
-    }
+    } else setCourseName('')
     setInputError('')
     setCourseId(event.target.value)
   }
@@ -126,7 +154,7 @@ export default function MyTable() {
     })
   }
   const register = () => {
-    if (courseId !== '' && studentId !== '') {
+    if ((courseId !== '' && studentId !== '')) {
       fetch(`${myUrl}?studentId=${studentId}&courseId=${courseId}`, {
         method: 'POST',
         headers: {
@@ -175,7 +203,7 @@ export default function MyTable() {
     <div className="filterDiv" style={{ display: 'flex', flexDirection: 'row' }}>
       <div className="selectDiv">
         Sort by:
-        <select value={myFilter} onChange={filterChange}>
+        <select value={(id !== 'noId') ? 'course' : myFilter} onChange={filterChange} disabled={id !== 'noId'}>
           <option value="student">StudentID</option>
           <option value="course">CourseID</option>
         </select>
@@ -194,7 +222,7 @@ export default function MyTable() {
     <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
       <td>
         {studentData !== 'error' && (
-        <select className="inputSelect" value={studentId} onChange={studentIdChange}>
+        <select className="inputSelect" value={studentId} disabled={id !== 'noId'} onChange={studentIdChange}>
           <option value="" />
           {studentData.map((data) => (
             <option key={data.studentId} value={data.studentId}>
@@ -256,4 +284,12 @@ export default function MyTable() {
       {errorDiv(dataError)}
     </div>
   )
+}
+
+MyTable.propTypes = {
+  id: string
+}
+
+MyTable.defaultProps = {
+  id: 'noId'
 }

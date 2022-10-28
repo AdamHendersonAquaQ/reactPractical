@@ -6,6 +6,7 @@ import MyEnrollmentTable from '../Table/MyEnrollmentTable'
 import Layout from '../Layout/Layout'
 import NoPage from '../NoPage'
 import './main.scss'
+import Student from '../Student/Student'
 
 function Main() {
   return (
@@ -20,7 +21,8 @@ function Main() {
           <Route path="/" element={<Layout />}>
             <Route path="students" element={<MyStudentTable />} />
             <Route path="courses" element={<MyCourseTable />} />
-            <Route path="enrollment" element={<MyEnrollmentTable />} />
+            <Route path="enrollment" element={<MyEnrollmentTable id="noId" />} />
+            <Route path="student/:number" element={<Student />} />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>

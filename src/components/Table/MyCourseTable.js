@@ -216,7 +216,15 @@ export default function MyTable() {
         <input key="creditAmount" className="rowInput" type="number" min="0" max="20" value={inputCreditAmount} onChange={creditAmountChange} />
       </td>
       <td>
-        <input key="studentCapacity" className="rowInput" type="number" min="0" value={inputStudentCapacity} onChange={studentCapacityChange} />
+        <input
+          key="studentCapacity"
+          className="rowInput"
+          type="number"
+          min="0"
+          max="1000"
+          value={inputStudentCapacity}
+          onChange={studentCapacityChange}
+        />
       </td>
       <td><input key="semesterCode" className="rowInput" type="text" value={inputSemesterCode} onChange={semesterCodeChange} /></td>
       <td key="register">

@@ -26,7 +26,7 @@ export default function Layout() {
   const location = useLocation()
   return (
     <div className="header">
-      <HeaderLink page="students" selected={location.pathname === '/students'} />
+      <HeaderLink page="students" selected={location.pathname.substring(0, 8) === '/student'} />
       <HeaderLink page="courses" selected={location.pathname === '/courses'} />
       <HeaderLink page="enrollment" selected={location.pathname === '/enrollment'} />
       <Outlet />

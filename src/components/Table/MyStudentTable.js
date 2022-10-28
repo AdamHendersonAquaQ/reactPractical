@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import header from './Shared/Header'
 import errorDiv from './Shared/Error'
 import './MyTable.scss'
@@ -204,6 +205,7 @@ export default function MyTable() {
           className="rowInput"
           type="number"
           min={new Date().getFullYear()}
+          max={new Date().getFullYear() + 100}
           value={inputGraduationYear}
           onChange={graduationYearChange}
         />
@@ -242,7 +244,12 @@ export default function MyTable() {
                     }
                 }
                 >
-                  {value}
+                  {prop !== 'studentId' && value}
+                  {prop === 'studentId' && (
+                  <Link to={`/student/${value}`}>
+                    <button type="button" className="tableButton">{value}</button>
+                  </Link>
+                  )}
                 </td>
               ))}
               <td key="edit">
