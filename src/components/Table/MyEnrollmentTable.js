@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { string } from 'prop-types'
 import header from './Shared/Header'
 import errorDiv from './Shared/Error'
+import LinkButton from './Shared/LinkButton'
 import './MyTable.scss'
 
 export default function MyTable({ id }) {
@@ -37,7 +38,8 @@ export default function MyTable({ id }) {
   const [inputLastName, setLastName] = useState('')
   const [courseId, setCourseId] = useState('')
   const [inputCourseName, setCourseName] = useState('')
-  const [showInput, setShowInput] = useState(true)
+
+  const [showInput, setShowInput] = useState(false)
 
   const clearData = () => {
     setEntry1('')
@@ -49,15 +51,10 @@ export default function MyTable({ id }) {
     setMyFilter(event.target.value)
     setSearchError('')
   }
-  const textChange = (event) => {
-    setEntry1(event.target.value)
-  }
   useEffect(() => {
     if (id === 'noId') {
       if (mainData.length === 0 || runEffect) {
         setRunEffect(false)
-        console.log('I am a use effect hook')
-        if (filterCode !== '') setShowInput(false)
         fetch(myUrl)
           .then((response) => response.json())
           .then((data) => {
@@ -70,8 +67,7 @@ export default function MyTable({ id }) {
               setDataError('')
             }
           })
-      }
-      if (studentData.length === 0) {
+      } else if (studentData.length === 0) {
         fetch(myStudentUrl)
           .then((response) => response.json())
           .then((data) => {
@@ -87,10 +83,8 @@ export default function MyTable({ id }) {
       setRunEffect(false)
       console.log('I am a use effect hook')
       let url = ''
-      if (filterCode !== '') {
-        setShowInput(false)
-        url = `http://localhost:8080/api/${siteCode}record/?studentId=${id}&${filterCode.replace('/', 'Id=')}`
-      } else { url = `${myUrl}student/${id}` }
+      if (filterCode !== '') url = `http://localhost:8080/api/${siteCode}record/?studentId=${id}&${filterCode.replace('/', 'Id=')}`
+      else { url = `${myUrl}student/${id}` }
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
@@ -105,16 +99,13 @@ export default function MyTable({ id }) {
           }
         })
     }
-    if (courseData.length === 0) {
+    if (mainData.length !== 0 && (id !== 'noId' || studentData.length !== 0) && courseData.length === 0) {
       fetch(myCourseUrl)
         .then((response) => response.json())
         .then((data) => {
           console.log('course data recieved: ', data)
-          if (Object.hasOwn(data, 'status')) {
-            setCourseData('error')
-          } else {
-            setCourseData(data)
-          }
+          if (Object.hasOwn(data, 'status')) setCourseData('error')
+          else setCourseData(data)
         })
     }
   }, [mainData.length, runEffect, myUrl, filterCode, studentData.length, courseData.length, id])
@@ -140,18 +131,23 @@ export default function MyTable({ id }) {
     setCourseId(event.target.value)
   }
   const removeRow = (studentIdData, courseIdData) => {
-    console.log('Removing row: ', studentIdData, courseIdData)
-    fetch(`${myUrl}?studentId=${studentIdData}&courseId=${courseIdData}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    }).then((response) => {
-      console.log('response received: ', response)
-      if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== studentIdData || row.courseId !== courseIdData)))
-      else console.log('Row not removed')
-    })
+    if (window.confirm('Are you sure you want to delete this item?')) {
+      console.log('Removing row: ', studentIdData, courseIdData)
+      fetch(`${myUrl}?studentId=${studentIdData}&courseId=${courseIdData}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }).then((response) => {
+        console.log('response received: ', response)
+        if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== studentIdData || row.courseId !== courseIdData)))
+        else {
+          console.log('Row not removed')
+          window.alert('Delete failed')
+        }
+      })
+    }
   }
   const register = () => {
     if ((courseId !== '' && studentId !== '')) {
@@ -175,13 +171,10 @@ export default function MyTable({ id }) {
             setFirstName('')
             setLastName('')
             setCourseName('')
+            setShowInput(false)
           }
         })
     } else setInputError('Please select a courseId and studentId')
-  }
-  const resetTable = () => {
-    clearData()
-    setShowInput(true)
   }
   const handleSubmit = () => {
     setSearchError('')
@@ -191,27 +184,31 @@ export default function MyTable({ id }) {
         setFilterCode(`${myFilter}/${entry1}`)
         setRunEffect(true)
       }
-    } else resetTable()
+    } else clearData()
   }
-  const handleKeypress = (e) => {
-    if (e.charCode === 13) {
-      handleSubmit()
-    }
-  }
+  const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
 
   const filter = (
-    <div className="filterDiv" style={{ display: 'flex', flexDirection: 'row' }}>
+    <div className="filterDiv">
       <div className="selectDiv">
         Sort by:
-        <select value={(id !== 'noId') ? 'course' : myFilter} onChange={filterChange} disabled={id !== 'noId'}>
+        <select className="filterSelect" value={(id !== 'noId') ? 'course' : myFilter} onChange={filterChange} disabled={id !== 'noId'}>
           <option value="student">StudentID</option>
           <option value="course">CourseID</option>
         </select>
       </div>
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
         <div className="input1">
-          {`Enter ${myFilter}:`}
-          <input type="text" name="entry1" value={entry1} onChange={textChange} onKeyPress={handleKeypress} />
+          {`Enter ${myFilter[0].toUpperCase() + myFilter.substring(1)} ID:`}
+          <input
+            type="text"
+            name="entry1"
+            className="inputEntry"
+            value={entry1}
+            onClick={() => setEntry1('')}
+            onChange={(e) => setEntry1(e.target.value)}
+            onKeyPress={handleKeypress}
+          />
         </div>
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
@@ -222,7 +219,7 @@ export default function MyTable({ id }) {
     <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
       <td>
         {studentData !== 'error' && (
-        <select className="inputSelect" value={studentId} disabled={id !== 'noId'} onChange={studentIdChange}>
+        <select size="1" className="inputSelect" value={studentId} disabled={id !== 'noId'} onChange={studentIdChange}>
           <option value="" />
           {studentData.map((data) => (
             <option key={data.studentId} value={data.studentId}>
@@ -233,28 +230,33 @@ export default function MyTable({ id }) {
         )}
         {studentData === 'error' && (<input key="studentName" className="rowInput" value={studentId} onChange={studentIdChange} />)}
       </td>
-      <td><input key="firstName" className="rowInput" disabled value={inputFirstName} /></td>
-      <td><input key="lastName" className="rowInput" disabled value={inputLastName} /></td>
+      <td><input size="1" key="firstName" className="rowInput" disabled value={inputFirstName} /></td>
+      <td><input size="1" key="lastName" className="rowInput" disabled value={inputLastName} /></td>
       <td>
         {courseData !== 'error' && (
-        <select className="inputSelect" value={courseId} onChange={courseIdChange}>
+        <select size="1" className="inputSelect" value={courseId} onChange={courseIdChange}>
           <option value="" />
           {courseData.map((data) => <option key={data.courseId} value={data.courseId}>{`${data.courseId} - ${data.courseName}`}</option>)}
         </select>
         )}
         {courseData === 'error' && (<input key="courseName" className="rowInput" value={courseId} onChange={courseIdChange} />)}
       </td>
-      <td><input key="courseName" className="rowInput" disabled value={inputCourseName} /></td>
+      <td><input size="1" key="courseName" className="rowInput" disabled value={inputCourseName} /></td>
       <td key="register">
-        <button className="tableButton" type="submit" onClick={() => { register() }}>
+        <button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>
           Register
         </button>
       </td>
     </tr>
   )
+  const inputButton = (
+    <tr className="inputRow" key="input">
+      <td key="add"><button type="button" className="tableButtonMax" onClick={() => setShowInput(!showInput)}>+</button></td>
+    </tr>
+  )
   return (
     <div className="tableDiv">
-      <h2>Enrollment Table</h2>
+      <h2>Enrollment Details</h2>
       {filter}
       <table className="tbl">
         {header(headerCols)}
@@ -263,21 +265,19 @@ export default function MyTable({ id }) {
             <tr key={`${data.studentId} ${data.courseId}`}>
               {Object.entries(data).map(([prop, value]) => (
                 <td key={prop}>
-                  {value}
+                  {LinkButton(prop, value, 'student')}
+                  {LinkButton(prop, value, 'course')}
+                  {(prop !== 'courseId' && prop !== 'studentId') && value}
                 </td>
               ))}
               <td key="delete">
-                <button
-                  className="tableButton"
-                  type="button"
-                  onClick={() => { if (window.confirm('Are you sure you want to delete this item?')) removeRow(data.studentId, data.courseId) }}
-                >
+                <button className="tableButtonDelete" type="button" onClick={() => { removeRow(data.studentId, data.courseId) }}>
                   Delete
                 </button>
               </td>
             </tr>
           ))}
-          {showInput && inputRow}
+          {filterCode === '' && (showInput ? inputRow : inputButton)}
         </tbody>
       </table>
       {errorDiv(inputError)}

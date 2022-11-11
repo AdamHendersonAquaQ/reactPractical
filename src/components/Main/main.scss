@@ -3,19 +3,30 @@
 body {
   background-color: $brand-bg;
   color: $brand-header;
+  padding: 0;
+  margin: 0;
 }
 
-.brand {
-  &-page {
-    &-name{
-      color: $brand-colourA;
-      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-      font-size: large;
-    }
-    &-title{
-      color: $brand-colourB;
-      font-size: x-large;
-      font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    }
-  }
+.logo{
+  width: 100px;
+  padding-left: 10;
+  padding-right: 20px;
+  vertical-align: center;
+}
+
+.title {
+  color: $brand-colourB;
+  margin: 0;
+  padding-top: 5;
+  padding-bottom: 5;
+  display: inline-block;
+  width: 100%;
+  background-color: $header-colour;
+  color: rgb(255, 255, 255);
+  font-size: xx-large;
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
 }

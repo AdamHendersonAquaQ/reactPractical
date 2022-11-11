@@ -1,44 +1,60 @@
 @import '../../utils/colours.scss';
 
-$background-colour:rgb(27, 164, 189);
-$content-colour: rgb(103, 174, 255);
-$hover-colour: rgb(95, 95, 255);
-$table-button-colour: rgba(34, 57, 184, 0.342);
+$header-colour:rgb(98, 255, 169);
+$content-colour: rgb(136, 211, 255);
+$hover-colour: rgb(60, 180, 250);
+$table-button-colour: rgba(34, 57, 184, 0.247);
 
 .table{
   &-header{
-    background-color: $background-colour;
+    background-color: $header-colour;
   }
   &-content{
-    background-color: $content-colour; 
     height: 100px;
     overflow-x: auto;
   }
   &Div{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    padding-top: 20px;
-  }
-  &Button{
-    width: 100%;
-    height: 40px;
+    font-size: large;
     padding-left: 10px;
-    padding-right: 10px;
+  }
+  &Button, &Button:hover, &ButtonMax, &ButtonMax:hover, &ButtonMin, &ButtonMin:hover, 
+  &ButtonEdit, &ButtonEdit:hover, &ButtonDelete, &ButtonDelete:hover, &ButtonRegister, &ButtonRegister:hover{
+    width: 80px;
+    height: 40px;
     background-color: $table-button-colour;
-    border-color: rgba(255, 255, 255, 0.733);
     border: 1px solid rgba(0, 0, 0, 0.356);
     text-align: center;
     display: table-cell;
     vertical-align: middle;
+    font-size: large;
   }
+  &Button:hover,&ButtonMin:hover {background-color: rgba(0, 17, 255, 0.281);}
+  &ButtonMax,&ButtonMax:hover {font-size: xx-large; background-color: rgb(131, 228, 144);}
+  &ButtonMax:hover {background-color: rgb(90, 204, 105);}
+  &ButtonMin,&ButtonMin:hover {font-size: xx-large;}
+  &ButtonDelete{background-color: rgb(255, 122, 122);}
+  &ButtonDelete:hover{background-color: rgb(204, 94, 94);}
+  &ButtonEdit{background-color: rgb(255, 188, 144);}
+  &ButtonEdit:hover{background-color: rgb(252, 160, 99);}
+  &ButtonRegister{background-color: rgb(131, 228, 144);}
+  &ButtonRegister{background-color: rgb(90, 204, 105);}
 }
-
-tbody tr:hover {
+tbody tr {
+  background-color: $content-colour; 
+}
+tbody tr:hover, tbody tr:nth-child(even):hover {
   background-color: $hover-colour
 }
-tbody tr:nth-child(odd):hover {
-  background-color: $hover-colour
+tbody tr:nth-child(even) {
+  background-color: rgb(184, 215, 255);}
+.hideButton{
+  background-color: rgb(60, 181, 250)!important;
 }
-
 table{
   width: 70%;
   border-collapse: collapse;
@@ -50,21 +66,32 @@ th, td{
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   border: 2px solid rgb(0,0,0);
   padding: 10px;
-  padding-left: 10px;
-  padding-right: 10px;
   text-align: center;
 }
-
-tbody tr:nth-child(odd) {
-background-color: rgb(138, 165, 255);}
 
 select{
   padding: 5px;
 }
 
-.filterDiv{
-  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  padding-bottom: 10px;
+.filter{
+  &Div{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    padding: 10px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: row;
+    width: fit-content;
+    border: 5px solid rgb(0, 172, 23);
+    border-radius: 10px;
+    background-color: rgb(179, 255, 148);
+  }
+  &Select{
+    text-align: center;
+    font-size: medium;
+    border: 2px solid rgb(0, 83, 11);
+    border-radius: 10px;
+    background-color: rgb(235, 255, 227);
+  }
 }
 
 input{
@@ -72,21 +99,28 @@ input{
 }
 
 .input{
-  &1{
+  &1, &2{
     text-align: center;
     padding-left: 5px;
     padding-right: 5px;
   }
-  &2{
-    text-align: center;
-    padding-left: 5px;
-    padding-right: 5px;
-
+  &Entry{
+    padding-top: 10px;
+    border: 2px solid rgb(0, 83, 11);
+    border-radius: 10px;
+    background-color: rgb(235, 255, 227);
   }
-  &Button{
-    width: 10%;
+  &Button, &Button:hover{
+    width: fit-content;
     padding-left: 10px;
-    background-color: $table-button-colour;
+    font-size: large;
+    padding-right: 10px;
+    border: 2px solid rgb(0, 83, 11);
+    border-radius: 10px;
+    background-color: rgba(33, 231, 59, 0.644);
+  }
+  &Button:hover{
+    background-color: rgb(29, 190, 50);
   }
   &Div{
     padding-left: 10px;
@@ -96,14 +130,12 @@ input{
       color: rgb(255, 0, 0);
     }
   }
-  &RowError{
-    background-color: rgba(255, 0, 0, 0.692);
-  }
-  &RowError:hover{
-    background-color: rgba(255, 0, 0, 0.692);
+  &RowError, &RowError:hover{
+    background-color: rgba(255, 55, 55, 0.692) !important;
   }
   &Select{
-    background-color: rgba(255, 255, 255, 0.418);
+    width: 80px;
+    background-color: $table-button-colour;
   }
 }
 
@@ -112,17 +144,19 @@ input{
 }
 
 .rowInput{
-  padding-top: 10%;
-  padding-bottom: 10%;
+  padding-top: 5%;
+  padding-bottom: 5%;
+  width: 100%;
   background-color: rgba(255, 255, 255, 0);
+  border-color: rgba(0, 0, 0, 0);
   color: black;
   font-size: medium;
   text-align: center;
+  box-sizing: border-box;
 }
-
 
 .errorDiv {
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   font-size: large;
-  color: red;
+  color: rgb(255, 62, 62);
 }

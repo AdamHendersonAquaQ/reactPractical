@@ -1,35 +1,36 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import {
+  BrowserRouter, Routes, Route
+} from 'react-router-dom'
 import MyStudentTable from '../Table/MyStudentTable'
+import Student from '../Individual/Student'
 import MyCourseTable from '../Table/MyCourseTable'
+import Course from '../Individual/Course'
 import MyEnrollmentTable from '../Table/MyEnrollmentTable'
 import Layout from '../Layout/Layout'
 import NoPage from '../NoPage'
+import Home from '../Home/Home'
 import './main.scss'
-import Student from '../Student/Student'
 
 function Main() {
   return (
-    <div>
-      <div>
-        <h1 className="brand-page-title">
-          Student Enrollment Service
-        </h1>
-      </div>
+    <>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route path="students" element={<MyStudentTable />} />
-            <Route path="courses" element={<MyCourseTable />} />
-            <Route path="enrollment" element={<MyEnrollmentTable id="noId" />} />
+            <Route path="/" element={<Home />} />
+            <Route path="students" element={<MyStudentTable id="noId" />} />
             <Route path="student/:number" element={<Student />} />
+            <Route path="courses" element={<MyCourseTable />} />
+            <Route path="course/:number" element={<Course />} />
+            <Route path="enrollment" element={<MyEnrollmentTable id="noId" />} />
             <Route path="*" element={<NoPage />} />
           </Route>
         </Routes>
       </BrowserRouter>
       <br />
       <br />
-    </div>
+    </>
   )
 }
 

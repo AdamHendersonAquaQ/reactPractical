@@ -1,7 +1,7 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
 import MyEnrollmentTable from '../Table/MyEnrollmentTable'
-import './Student.scss'
+import MyStudentTable from '../Table/MyStudentTable'
 
 export default function Student() {
   const { number } = useParams()
@@ -9,9 +9,7 @@ export default function Student() {
     <div>
       {number !== '' && (
         <div>
-          <div className="studentDiv">
-            {`Student: ${number}`}
-          </div>
+          <MyStudentTable id={number} />
           <MyEnrollmentTable id={number} />
         </div>
       )}

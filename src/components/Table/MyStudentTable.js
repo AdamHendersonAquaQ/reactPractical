@@ -1,11 +1,13 @@
 /* eslint-disable no-console */
-import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { string } from 'prop-types'
 import header from './Shared/Header'
 import errorDiv from './Shared/Error'
 import './MyTable.scss'
+import LinkButton from './Shared/LinkButton'
 
-export default function MyTable() {
+export default function MyTable({ id }) {
   const headerCols = [
     'ID',
     'First Name',
@@ -16,13 +18,16 @@ export default function MyTable() {
   ]
   const [mainData, setMainData] = useState([])
   const [editingRow, setEditingRow] = useState([])
+  const [runEffect, setRunEffect] = useState(false)
+
   const siteCode = 'student/'
   const [filterCode, setFilterCode] = useState('')
   const myUrl = `http://localhost:8080/api/${siteCode}${filterCode}`
+
   const [myFilter, setMyFilter] = useState('id')
   const [entry1, setEntry1] = useState('')
   const [entry2, setEntry2] = useState('')
-  const [runEffect, setRunEffect] = useState(false)
+
   const [searchError, setSearchError] = useState('')
   const [inputError, setInputError] = useState('')
   const [dataError, setDataError] = useState('')
@@ -30,7 +35,12 @@ export default function MyTable() {
   const [inputFirstName, setFirstName] = useState('')
   const [inputLastName, setLastName] = useState('')
   const [inputGraduationYear, setGraduationYear] = useState('')
-  const [showInput, setShowInput] = useState(true)
+
+  const [showInput, setShowInput] = useState(false)
+  const [inputClassname, setInputClassname] = useState('inputRow')
+  const previous = useRef('')
+
+  const navigate = useNavigate()
 
   const clearData = () => {
     setEntry1('')
@@ -43,32 +53,10 @@ export default function MyTable() {
     setMyFilter(event.target.value)
     setSearchError('')
   }
-  const textChange = (event) => {
-    setEntry1(event.target.value)
-  }
-  const textChange2 = (event) => {
-    setEntry2(event.target.value)
-  }
-
-  const firstNameChange = (event) => {
-    setInputError('')
-    setFirstName(event.target.value)
-  }
-  const lastNameChange = (event) => {
-    setInputError('')
-    setLastName(event.target.value)
-  }
-  const graduationYearChange = (event) => {
-    setInputError('')
-    setGraduationYear(event.target.value)
-  }
-
   useEffect(() => {
     if (mainData.length === 0 || runEffect) {
       setRunEffect(false)
-      console.log('I am a use effect hook')
-      if (filterCode !== '') setShowInput(false)
-      fetch(myUrl)
+      fetch((id === 'noId') ? myUrl : `http://localhost:8080/api/${siteCode}id/${id}`)
         .then((response) => response.json())
         .then((data) => {
           console.log('data recieved: ', data)
@@ -81,29 +69,36 @@ export default function MyTable() {
           }
         })
     }
-  }, [mainData.length, runEffect, myUrl, filterCode])
+  }, [mainData.length, runEffect, myUrl, id])
 
   const removeRow = (rowData) => {
-    console.log('Removing row: ', rowData)
-    console.log('filter: ', mainData.filter((row) => (row.studentId === rowData)))
-    fetch(`${myUrl}id/${rowData}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      }
-    }).then((response) => {
-      console.log('response received: ', response)
-      if (response.ok) setMainData(mainData.filter((row) => (row.studentId !== rowData)))
-      else console.log('Row not removed')
-    })
+    if (window.confirm('Are you sure you want to delete this item?')) {
+      console.log('Removing row: ', rowData)
+      console.log('filter: ', mainData.filter((row) => (row.studentId === rowData)))
+      fetch(`${myUrl}id/${rowData}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*'
+        }
+      }).then((response) => {
+        console.log('response received: ', response)
+        if (response.ok) {
+          setMainData(mainData.filter((row) => (row.studentId !== rowData)))
+          if (id !== 'noId') navigate('/students')
+        } else {
+          console.log('Row not removed')
+          window.alert('Delete failed')
+        }
+      })
+    }
   }
 
   const updateRow = (value, rowData, field) => {
     const rowToUpdate = mainData.filter((row) => (row.studentId === rowData.studentId))
     console.log('value: ', value)
     console.log('field: ', field)
-    const ogVal = rowToUpdate[0][field]
+    previous.current = rowToUpdate[0][field]
     rowToUpdate[0][field] = value
     console.log(rowToUpdate[0])
     fetch(`${myUrl}update/`, {
@@ -114,14 +109,13 @@ export default function MyTable() {
       },
       body: JSON.stringify(rowToUpdate[0])
     }).then((response) => {
-      if (!response.ok) rowToUpdate[0][field] = `${ogVal} `
+      if (!response.ok) {
+        rowToUpdate[0][field] = `${previous.current} `
+        window.alert('Update failed')
+      }
       console.log(response)
       setEditingRow([])
     })
-  }
-  const resetTable = () => {
-    clearData()
-    setShowInput(true)
   }
   const handleSubmit = () => {
     setSearchError('')
@@ -132,11 +126,9 @@ export default function MyTable() {
         setFilterCode(tempFilterCode)
         setRunEffect(true)
       }
-    } else resetTable()
+    } else clearData()
   }
   const register = () => {
-    console.log(inputFirstName !== '')
-    console.log(Number.isNaN(parseInt(inputGraduationYear, 10)))
     if (inputFirstName !== '') {
       const jsonData = {
         firstName: inputFirstName,
@@ -157,21 +149,35 @@ export default function MyTable() {
             setFirstName('')
             setLastName('')
             setGraduationYear('')
-          } else setInputError(data.message)
+            setShowInput(false)
+          } else {
+            setInputError(data.message)
+            setInputClassname('inputRowError')
+          }
         })
-    } else setInputError('First name cannot be left blank')
+    } else {
+      setInputError('First name cannot be left blank')
+      setInputClassname('inputRowError')
+    }
   }
-  const handleKeypress = (e) => {
-    if (e.charCode === 13) {
-      handleSubmit()
+  const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
+
+  const doOnBlur = (event, prop, data) => {
+    if (prop !== 'studentId') {
+      const rowToUpdate = mainData.filter((row) => (row.studentId === data.studentId))
+      previous.current = rowToUpdate[0][prop]
+      if (window.confirm('Are you sure you want to make these changes?')) { updateRow(event.target.innerHTML, data, prop) } else {
+        setEditingRow([])
+        rowToUpdate[0][prop] = `${previous.current} `
+      }
     }
   }
 
   const filter = (
-    <div className="filterDiv" style={{ display: 'flex', flexDirection: 'row' }}>
+    <div className="filterDiv">
       <div className="selectDiv">
         Sort by:
-        <select value={myFilter} onChange={filterChange}>
+        <select className="filterSelect" value={myFilter} onChange={filterChange}>
           <option value="id">Id</option>
           <option value="studentName">Name</option>
           <option value="semester">Semester Code</option>
@@ -179,13 +185,29 @@ export default function MyTable() {
       </div>
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
         <div className="input1">
-          {`Enter ${myFilter}:`}
-          <input type="text" name="entry1" value={entry1} onChange={textChange} onKeyPress={handleKeypress} />
+          {myFilter === 'studentName' ? 'Enter First Name:' : `Enter ${myFilter[0].toUpperCase() + myFilter.substring(1)}:`}
+          <input
+            type="text"
+            className="inputEntry"
+            name="entry1"
+            value={entry1}
+            onClick={() => setEntry1('')}
+            onChange={(e) => setEntry1(e.target.value)}
+            onKeyPress={handleKeypress}
+          />
         </div>
         {myFilter === 'studentName' && (
           <div className="input2">
-            Enter second name:
-            <input type="text" name="entry2" value={entry2} onChange={textChange2} onKeyPress={handleKeypress} />
+            Enter Second name:
+            <input
+              type="text"
+              className="inputEntry"
+              name="entry2"
+              value={entry2}
+              onClick={() => setEntry2('')}
+              onChange={(e) => setEntry2(e.target.value)}
+              onKeyPress={handleKeypress}
+            />
           </div>
         )}
       </div>
@@ -193,90 +215,91 @@ export default function MyTable() {
       {errorDiv(searchError)}
     </div>
   )
-
-  const inputRow = (
-    <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
-      <td key="id" />
-      <td><input key="firstName" className="rowInput" type="text" value={inputFirstName} onChange={firstNameChange} /></td>
-      <td><input key="lastName" className="rowInput" type="text" value={inputLastName} onChange={lastNameChange} /></td>
+  const inputFields = (
+    <>
+      <td>
+        <input size="1" key="firstName" className="rowInput" type="text" value={inputFirstName} onChange={(e) => setFirstName(e.target.value)} />
+      </td>
+      <td><input size="1" key="lastName" className="rowInput" type="text" value={inputLastName} onChange={(e) => setLastName(e.target.value)} /></td>
       <td>
         <input
+          size="1"
           key="graduationYear"
           className="rowInput"
           type="number"
           min={new Date().getFullYear()}
           max={new Date().getFullYear() + 100}
           value={inputGraduationYear}
-          onChange={graduationYearChange}
+          onChange={(e) => setGraduationYear(e.target.value)}
         />
       </td>
       <td key="register">
-        <button className="tableButton" type="submit" onClick={() => { register() }}>
+        <button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>
           Register
         </button>
       </td>
+    </>
+  )
+  const getInputClassname = () => {
+    if (!showInput) {
+      if (inputError === '') setInputClassname('hideButton')
+      else setInputClassname('inputRowError')
+    } else setInputClassname('inputRow')
+  }
+  const inputRow = (
+    <tr className={inputClassname} key="input" onChange={() => { if (inputError !== '') setInputError(''); getInputClassname() }}>
+      <td size="1" key="add">
+        <button
+          type="button"
+          className={showInput ? 'tableButtonMin' : 'tableButtonMax'}
+          onClick={() => { setShowInput(!showInput); getInputClassname(); setFirstName(''); setLastName(''); setGraduationYear('') }}
+        >
+          {showInput ? '-' : '+'}
+        </button>
+      </td>
+      {showInput && inputFields}
     </tr>
   )
 
   return (
     <div className="tableDiv">
-      <h2>Student Table</h2>
-      {filter}
+      <h2>{ id === 'noId' ? 'View All Students' : `Student: ${id}`}</h2>
+      { id === 'noId' && filter}
       <table className="tbl">
         {header(headerCols)}
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
             <tr key={data.studentId}>
               {Object.entries(data).map(([prop, value]) => (
-                <td
-                  key={prop}
-                  contentEditable={data.studentId === editingRow}
-                  onBlur={
-                    (event) => {
-                      const rowToUpdate = mainData.filter((row) => (row.studentId === data.studentId))
-                      const ogVal = rowToUpdate[0][prop]
-                      if (window.confirm('Are you sure you want to make these changes?')) {
-                        updateRow(event.target.innerHTML, data, prop)
-                      } else {
-                        setEditingRow([])
-                        rowToUpdate[0][prop] = `${ogVal} `
-                      }
-                    }
-                }
-                >
-                  {prop !== 'studentId' && value}
-                  {prop === 'studentId' && (
-                  <Link to={`/student/${value}`}>
-                    <button type="button" className="tableButton">{value}</button>
-                  </Link>
-                  )}
+                <td key={prop} contentEditable={data.studentId === editingRow && prop !== 'studentId'} onBlur={(e) => { doOnBlur(e, prop, data) }}>
+                  {prop !== 'studentId' ? value : LinkButton(prop, value, 'student')}
                 </td>
               ))}
               <td key="edit">
-                <button
-                  className="tableButton"
-                  type="button"
-                  onClick={() => { setEditingRow(data.studentId) }}
-                >
+                <button className="tableButtonEdit" type="button" onClick={() => { setEditingRow(data.studentId) }}>
                   Edit
                 </button>
               </td>
               <td key="delete">
-                <button
-                  className="tableButton"
-                  type="button"
-                  onClick={() => { if (window.confirm('Are you sure you want to delete this item?')) removeRow(data.studentId) }}
-                >
+                <button className="tableButtonDelete" type="button" onClick={() => { removeRow(data.studentId) }}>
                   Delete
                 </button>
               </td>
             </tr>
           ))}
-          {showInput && inputRow}
+          {(filterCode === '' && (id === 'noId')) && inputRow}
         </tbody>
       </table>
-      {errorDiv(inputError)}
+      {showInput && errorDiv(inputError)}
       {errorDiv(dataError)}
     </div>
   )
+}
+
+MyTable.propTypes = {
+  id: string
+}
+
+MyTable.defaultProps = {
+  id: 'noId'
 }
