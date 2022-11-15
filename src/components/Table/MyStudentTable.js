@@ -14,10 +14,11 @@ export default function MyTable({ id }) {
     { label: 'Graduation Year', accesor: 'graduationYear' }
   ]
   const [mainData, setMainData] = useState([])
-  const [sortType, setSortType] = useState('studentId')
-  const [sortOrder, setSortOrder] = useState('ASC')
   const [editingRow, setEditingRow] = useState([])
   const [runEffect, setRunEffect] = useState(false)
+
+  const [sortType, setSortType] = useState('studentId')
+  const [sortOrder, setSortOrder] = useState('ASC')
   const [sortEffect, setSortEffect] = useState(false)
 
   const siteCode = 'student/'
@@ -150,6 +151,18 @@ export default function MyTable({ id }) {
       }
     } else clearData()
   }
+  const setSort = (col) => {
+    if (mainData !== 'error') {
+      if (sortType === col) {
+        if (sortOrder === 'ASC') setSortOrder('DESC')
+        else setSortOrder('ASC')
+      } else {
+        setSortType(col)
+        setSortOrder('ASC')
+      }
+      setSortEffect(true)
+    }
+  }
   const register = () => {
     if (inputFirstName !== '') {
       const jsonData = {
@@ -273,18 +286,6 @@ export default function MyTable({ id }) {
       {showInput && inputFields}
     </tr>
   )
-  const setSort = (col) => {
-    if (mainData !== 'error') {
-      if (sortType === col) {
-        if (sortOrder === 'ASC') setSortOrder('DESC')
-        else setSortOrder('ASC')
-      } else {
-        setSortType(col)
-        setSortOrder('ASC')
-      }
-      setSortEffect(true)
-    }
-  }
 
   return (
     <div className="tableDiv">

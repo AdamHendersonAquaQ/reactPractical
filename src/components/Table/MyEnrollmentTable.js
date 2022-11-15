@@ -1,19 +1,17 @@
 /* eslint-disable no-console */
 import React, { useState, useEffect } from 'react'
 import { string } from 'prop-types'
-import header from './Shared/Header'
 import errorDiv from './Shared/Error'
 import LinkButton from './Shared/LinkButton'
 import './MyTable.scss'
 
 export default function MyTable({ id }) {
   const headerCols = [
-    'StudentID',
-    'First Name',
-    'Last Name',
-    'Course ID',
-    'Course Name',
-    'Delete'
+    { label: 'Student ID', accesor: 'studentId' },
+    { label: 'First Name', accesor: 'firstName' },
+    { label: 'Last Name', accesor: 'lastName' },
+    { label: 'Course ID', accesor: 'courseId' },
+    { label: 'Course Name', accesor: 'courseName' }
   ]
 
   const [mainData, setMainData] = useState([])
@@ -26,9 +24,15 @@ export default function MyTable({ id }) {
   const myStudentUrl = 'http://localhost:8080/api/student/'
   const myCourseUrl = 'http://localhost:8080/api/course'
 
+  const [runEffect, setRunEffect] = useState(false)
+
+  const [sortType, setSortType] = useState('studentId')
+  const [sortOrder, setSortOrder] = useState('ASC')
+  const [sortEffect, setSortEffect] = useState(false)
+
   const [myFilter, setMyFilter] = useState('course')
   const [entry1, setEntry1] = useState('')
-  const [runEffect, setRunEffect] = useState(false)
+
   const [searchError, setSearchError] = useState('')
   const [inputError, setInputError] = useState('')
   const [dataError, setDataError] = useState('')
@@ -63,7 +67,14 @@ export default function MyTable({ id }) {
               setMainData('error')
               setDataError(data.message)
             } else {
-              setMainData(data)
+              const sorted = [...Object.entries(data)]
+                .sort((a, b) => a[1].studentId.toString().localeCompare(b[1].studentId.toString()))
+                .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+              const objSorted = []
+              sorted.forEach((item) => {
+                [, objSorted[sorted.indexOf(item)]] = item
+              })
+              setMainData(objSorted)
               setDataError('')
             }
           })
@@ -107,8 +118,18 @@ export default function MyTable({ id }) {
           if (Object.hasOwn(data, 'status')) setCourseData('error')
           else setCourseData(data)
         })
+    } else if (sortEffect) {
+      setSortEffect(false)
+      const sorted = [...Object.entries(mainData)]
+        .sort((a, b) => a[1].studentId.toString().localeCompare(b[1].studentId.toString()))
+        .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      const objSorted = []
+      sorted.forEach((item) => {
+        [, objSorted[sorted.indexOf(item)]] = item
+      })
+      setMainData(objSorted)
     }
-  }, [mainData.length, runEffect, myUrl, filterCode, studentData.length, courseData.length, id])
+  }, [runEffect, myUrl, filterCode, studentData.length, courseData.length, id, mainData, sortEffect, sortType, sortOrder])
 
   const studentIdChange = (event) => {
     if (studentData !== 'error' && event.target.value !== '') {
@@ -186,6 +207,18 @@ export default function MyTable({ id }) {
       }
     } else clearData()
   }
+  const setSort = (col) => {
+    if (mainData !== 'error') {
+      if (sortType === col) {
+        if (sortOrder === 'ASC') setSortOrder('DESC')
+        else setSortOrder('ASC')
+      } else {
+        setSortType(col)
+        setSortOrder('ASC')
+      }
+      setSortEffect(true)
+    }
+  }
   const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
 
   const filter = (
@@ -242,7 +275,7 @@ export default function MyTable({ id }) {
         {courseData === 'error' && (<input key="courseName" className="rowInput" value={courseId} onChange={courseIdChange} />)}
       </td>
       <td><input size="1" key="courseName" className="rowInput" disabled value={inputCourseName} /></td>
-      <td key="register">
+      <td className="editDeleteTd" key="register">
         <button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>
           Register
         </button>
@@ -259,18 +292,30 @@ export default function MyTable({ id }) {
       <h2>Enrollment Details</h2>
       {filter}
       <table className="tbl">
-        {header(headerCols)}
+        <thead className="table-header">
+          <tr key="headers">
+            {headerCols.map((col) => (
+              <td key={col.label}>
+                <button className="headerButton" onClick={() => setSort(col.accesor)} type="button">
+                  {col.label}
+                  {sortType === col.accesor ? <img src={sortOrder === 'ASC' ? '\\.\\up_arrow.png' : '\\.\\down_arrow.png'} alt="Sort Arrow" />
+                    : <img src="\.\default.png" alt="Sort Arrow" />}
+                </button>
+              </td>
+            ))}
+          </tr>
+        </thead>
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
             <tr key={`${data.studentId} ${data.courseId}`}>
               {Object.entries(data).map(([prop, value]) => (
-                <td key={prop}>
+                <td className={prop.slice(-2) === 'Id' ? 'studentIdTd' : 'regularTd'} key={prop}>
                   {LinkButton(prop, value, 'student')}
                   {LinkButton(prop, value, 'course')}
-                  {(prop !== 'courseId' && prop !== 'studentId') && value}
+                  {prop.slice(-2) !== 'Id' && value}
                 </td>
               ))}
-              <td key="delete">
+              <td className="editDeleteTd" key="delete">
                 <button className="tableButtonDelete" type="button" onClick={() => { removeRow(data.studentId, data.courseId) }}>
                   Delete
                 </button>
