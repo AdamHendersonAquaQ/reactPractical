@@ -9,19 +9,19 @@ export default function Home() {
         Welcome to the SEGA Student Enrollment Service!
       </h1>
       <div className="homeDiv">
-        <Link to="/students">
+        <Link to="/students" style={{ textDecoration: 'none' }}>
           <button type="button" className="homeButton">
             <img className="icon" src="studentsIcon.png" alt="Students Icon" />
             Students
           </button>
         </Link>
-        <Link to="/courses">
+        <Link to="/courses" style={{ textDecoration: 'none' }}>
           <button type="button" className="homeButton">
             <img className="icon" src="coursesIcon.png" alt="Courses Icon" />
             Courses
           </button>
         </Link>
-        <Link to="/enrollment">
+        <Link to="/enrollment" style={{ textDecoration: 'none' }}>
           <button type="button" className="homeButton">
             <img className="icon" src="enrollmentIcon.png" alt="Enrollment Icon" />
             Enrollment

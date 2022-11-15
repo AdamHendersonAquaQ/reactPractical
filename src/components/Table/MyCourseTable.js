@@ -110,6 +110,7 @@ export default function MyTable({ id }) {
       })
     }
   }
+
   const updateRow = (value, rowData, field) => {
     const rowToUpdate = mainData.filter((row) => (row.courseId === rowData.courseId))
     console.log('value: ', value)
@@ -133,6 +134,7 @@ export default function MyTable({ id }) {
       setEditingRow([])
     })
   }
+
   const register = () => {
     if (inputCourseName !== '' && inputSubjectArea !== '') {
       const jsonData = {
@@ -171,14 +173,18 @@ export default function MyTable({ id }) {
   }
   const handleSubmit = () => {
     setSearchError('')
-    if (entry1 !== '') {
-      if ((myFilter === 'id' || myFilter === 'semester') && Number.isNaN(parseInt(entry1, 10))) {
-        setSearchError('Error: Id field must be an integer.  ')
+    if ((myFilter !== 'studentId' && entry1 !== '') || (myFilter === 'studentId' && entry1 !== '' && semesterEntry !== '')) {
+      if ((myFilter === 'id' || myFilter === 'studentId') && Number.isNaN(parseInt(entry1, 10))) {
+        setSearchError('Error: Id field must be an integer.')
       } else {
         if (myFilter === 'studentId') setFilterCode(`studentSemester/?studentId=${entry1}&semesterCode=${semesterEntry}`)
         else setFilterCode(`${myFilter}/${entry1}`)
         setRunEffect(true)
       }
+    } else if (myFilter === 'studentId' && entry1 === '' && semesterEntry === '') {
+      clearData()
+    } else if (myFilter === 'studentId' && (entry1 === '' || semesterEntry === '')) {
+      setSearchError('Error: Must give ID and Semester Code.')
     } else clearData()
   }
   const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
@@ -296,6 +302,7 @@ export default function MyTable({ id }) {
             setCreditAmount('')
             setStudentCapacity('')
             setSemCode('')
+            setInputError('')
           }}
         >
           {showInput ? '-' : '+'}

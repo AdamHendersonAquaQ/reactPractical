@@ -193,8 +193,8 @@ export default function MyTable({ id }) {
       <div className="selectDiv">
         Sort by:
         <select className="filterSelect" value={(id !== 'noId') ? 'course' : myFilter} onChange={filterChange} disabled={id !== 'noId'}>
-          <option value="student">StudentID</option>
           <option value="course">CourseID</option>
+          <option value="student">StudentID</option>
         </select>
       </div>
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
@@ -219,7 +219,7 @@ export default function MyTable({ id }) {
     <tr className={inputError !== '' ? 'inputRowError' : 'inputRow'} key="input">
       <td>
         {studentData !== 'error' && (
-        <select size="1" className="inputSelect" value={studentId} disabled={id !== 'noId'} onChange={studentIdChange}>
+        <select size="1" className="inputSelectEnrollment" value={studentId} disabled={id !== 'noId'} onChange={studentIdChange}>
           <option value="" />
           {studentData.map((data) => (
             <option key={data.studentId} value={data.studentId}>
@@ -234,7 +234,7 @@ export default function MyTable({ id }) {
       <td><input size="1" key="lastName" className="rowInput" disabled value={inputLastName} /></td>
       <td>
         {courseData !== 'error' && (
-        <select size="1" className="inputSelect" value={courseId} onChange={courseIdChange}>
+        <select size="1" className="inputSelectEnrollment" value={courseId} onChange={courseIdChange}>
           <option value="" />
           {courseData.map((data) => <option key={data.courseId} value={data.courseId}>{`${data.courseId} - ${data.courseName}`}</option>)}
         </select>

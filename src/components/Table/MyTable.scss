@@ -24,10 +24,13 @@ $table-button-colour: rgba(34, 57, 184, 0.247);
   }
   &Button, &Button:hover, &ButtonMax, &ButtonMax:hover, &ButtonMin, &ButtonMin:hover, 
   &ButtonEdit, &ButtonEdit:hover, &ButtonDelete, &ButtonDelete:hover, &ButtonRegister, &ButtonRegister:hover{
-    width: 80px;
+    width: fit-content;
+    padding-left: 10px;
+    padding-right: 10px;
     height: 40px;
     background-color: $table-button-colour;
     border: 1px solid rgba(0, 0, 0, 0.356);
+    border-radius: 5px;
     text-align: center;
     display: table-cell;
     vertical-align: middle;
@@ -37,12 +40,20 @@ $table-button-colour: rgba(34, 57, 184, 0.247);
   &ButtonMax,&ButtonMax:hover {font-size: xx-large; background-color: rgb(131, 228, 144);}
   &ButtonMax:hover {background-color: rgb(90, 204, 105);}
   &ButtonMin,&ButtonMin:hover {font-size: xx-large;}
-  &ButtonDelete{background-color: rgb(255, 122, 122);}
-  &ButtonDelete:hover{background-color: rgb(204, 94, 94);}
-  &ButtonEdit{background-color: rgb(255, 188, 144);}
-  &ButtonEdit:hover{background-color: rgb(252, 160, 99);}
-  &ButtonRegister{background-color: rgb(131, 228, 144);}
-  &ButtonRegister{background-color: rgb(90, 204, 105);}
+  &ButtonDelete{margin-left:5px;background-color: rgb(255, 122, 122);}
+  &ButtonDelete:hover{margin-left:5px;background-color: rgb(204, 94, 94);}
+  &ButtonEdit{margin-left:5px;background-color: rgb(255, 188, 144);}
+  &ButtonEdit:hover{margin-left:5px;background-color: rgb(252, 160, 99);}
+  &ButtonRegister{height:50px; width: 95%; margin-left:5px; background-color: rgb(131, 228, 144);}
+  &ButtonRegister:hover{height:50px; width: 95%; margin-left:5px; background-color: rgb(90, 204, 105);}
+}
+.headerButton{
+  background-color: rgba(255, 255, 255, 0);
+  font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: medium;
+  font-weight: bold;
+  width: max-content;
+  border: 0px;
 }
 tbody tr {
   background-color: $content-colour; 
@@ -51,7 +62,20 @@ tbody tr:hover, tbody tr:nth-child(even):hover {
   background-color: $hover-colour
 }
 tbody tr:nth-child(even) {
-  background-color: rgb(184, 215, 255);}
+  background-color: rgb(184, 215, 255);
+}
+.editDeleteTd{
+  background-color: $brand-bg!important;
+  border: 0px;
+  width: 140px;
+  padding-left: 0px;
+}
+.studentIdTd{
+  width: 50px;
+}
+.editRow {
+  background-color: rgb(252, 160, 99)!important;
+}
 .hideButton{
   background-color: rgb(60, 181, 250)!important;
 }
@@ -64,6 +88,7 @@ table{
 
 th, td{
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-size: large;
   border: 2px solid rgb(0,0,0);
   padding: 10px;
   text-align: center;
@@ -133,8 +158,9 @@ input{
   &RowError, &RowError:hover{
     background-color: rgba(255, 55, 55, 0.692) !important;
   }
-  &Select{
-    width: 80px;
+  &Select, &SelectEnrollment{
+    width: 50px;
+    font-size: large;
     background-color: $table-button-colour;
   }
 }
@@ -150,13 +176,18 @@ input{
   background-color: rgba(255, 255, 255, 0);
   border-color: rgba(0, 0, 0, 0);
   color: black;
-  font-size: medium;
+  font-size: large;
   text-align: center;
   box-sizing: border-box;
 }
 
 .errorDiv {
+  padding-top: 5px;
+  padding-left: 10px;
   font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
   font-size: large;
   color: rgb(255, 62, 62);
+}
+.up{
+  background-image: url("/public/up_arrow.png");
 }

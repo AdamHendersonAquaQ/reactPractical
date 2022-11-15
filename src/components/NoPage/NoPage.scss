@@ -1,0 +1,24 @@
+.noPageDiv{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.errorHeader{
+    padding-top: 30px;
+    font-size: xx-large;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+
+.homeButton{
+    border-radius: 10%!important;
+    height: 200px;
+    width: fit-content;
+    vertical-align: center;
+    margin-top: 50px;
+    font-size: x-large;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    background-color: rgb(162, 213, 255);
+    border: 5px solid rgb(0, 85, 155);
+}

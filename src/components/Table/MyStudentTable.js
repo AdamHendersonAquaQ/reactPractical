@@ -2,23 +2,23 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { string } from 'prop-types'
-import header from './Shared/Header'
 import errorDiv from './Shared/Error'
 import './MyTable.scss'
 import LinkButton from './Shared/LinkButton'
 
 export default function MyTable({ id }) {
   const headerCols = [
-    'ID',
-    'First Name',
-    'Second Name',
-    'Graduation Year',
-    'Edit',
-    'Delete'
+    { label: 'ID', accesor: 'studentId' },
+    { label: 'First Name', accesor: 'firstName' },
+    { label: 'Last Name', accesor: 'lastName' },
+    { label: 'Graduation Year', accesor: 'graduationYear' }
   ]
   const [mainData, setMainData] = useState([])
+  const [sortType, setSortType] = useState('studentId')
+  const [sortOrder, setSortOrder] = useState('ASC')
   const [editingRow, setEditingRow] = useState([])
   const [runEffect, setRunEffect] = useState(false)
+  const [sortEffect, setSortEffect] = useState(false)
 
   const siteCode = 'student/'
   const [filterCode, setFilterCode] = useState('')
@@ -64,12 +64,29 @@ export default function MyTable({ id }) {
             setMainData('error')
             setDataError(data.message)
           } else {
-            setMainData(data)
+            const sorted = [...Object.entries(data)]
+              .sort((a, b) => a[1].studentId.toString().localeCompare(b[1].studentId.toString()))
+              .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+            const objSorted = []
+            sorted.forEach((item) => {
+              [, objSorted[sorted.indexOf(item)]] = item
+            })
+            setMainData(objSorted)
             setDataError('')
           }
         })
+    } else if (sortEffect) {
+      setSortEffect(false)
+      const sorted = [...Object.entries(mainData)]
+        .sort((a, b) => a[1].studentId.toString().localeCompare(b[1].studentId.toString()))
+        .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      const objSorted = []
+      sorted.forEach((item) => {
+        [, objSorted[sorted.indexOf(item)]] = item
+      })
+      setMainData(objSorted)
     }
-  }, [mainData.length, runEffect, myUrl, id])
+  }, [mainData.length, runEffect, myUrl, id, sortType, sortOrder, mainData, sortEffect])
 
   const removeRow = (rowData) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
@@ -96,26 +113,31 @@ export default function MyTable({ id }) {
 
   const updateRow = (value, rowData, field) => {
     const rowToUpdate = mainData.filter((row) => (row.studentId === rowData.studentId))
-    console.log('value: ', value)
-    console.log('field: ', field)
     previous.current = rowToUpdate[0][field]
-    rowToUpdate[0][field] = value
-    console.log(rowToUpdate[0])
-    fetch(`${myUrl}update/`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(rowToUpdate[0])
-    }).then((response) => {
-      if (!response.ok) {
+    if (String(previous.current) !== String(value)) {
+      if (window.confirm('Are you sure you want to make these changes?')) {
+        rowToUpdate[0][field] = value
+        console.log(rowToUpdate[0])
+        fetch(`${myUrl}update/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify(rowToUpdate[0])
+        }).then((response) => {
+          if (!response.ok) {
+            rowToUpdate[0][field] = `${previous.current} `
+            window.alert('Update failed')
+          }
+          console.log(response)
+          setEditingRow([])
+        })
+      } else {
+        setEditingRow([])
         rowToUpdate[0][field] = `${previous.current} `
-        window.alert('Update failed')
       }
-      console.log(response)
-      setEditingRow([])
-    })
+    } else setEditingRow([])
   }
   const handleSubmit = () => {
     setSearchError('')
@@ -161,17 +183,6 @@ export default function MyTable({ id }) {
     }
   }
   const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
-
-  const doOnBlur = (event, prop, data) => {
-    if (prop !== 'studentId') {
-      const rowToUpdate = mainData.filter((row) => (row.studentId === data.studentId))
-      previous.current = rowToUpdate[0][prop]
-      if (window.confirm('Are you sure you want to make these changes?')) { updateRow(event.target.innerHTML, data, prop) } else {
-        setEditingRow([])
-        rowToUpdate[0][prop] = `${previous.current} `
-      }
-    }
-  }
 
   const filter = (
     <div className="filterDiv">
@@ -233,7 +244,7 @@ export default function MyTable({ id }) {
           onChange={(e) => setGraduationYear(e.target.value)}
         />
       </td>
-      <td key="register">
+      <td className="editDeleteTd" key="register">
         <button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>
           Register
         </button>
@@ -252,7 +263,9 @@ export default function MyTable({ id }) {
         <button
           type="button"
           className={showInput ? 'tableButtonMin' : 'tableButtonMax'}
-          onClick={() => { setShowInput(!showInput); getInputClassname(); setFirstName(''); setLastName(''); setGraduationYear('') }}
+          onClick={() => {
+            setShowInput(!showInput); setInputError(''); getInputClassname(); setFirstName(''); setLastName(''); setGraduationYear('')
+          }}
         >
           {showInput ? '-' : '+'}
         </button>
@@ -260,27 +273,54 @@ export default function MyTable({ id }) {
       {showInput && inputFields}
     </tr>
   )
+  const setSort = (col) => {
+    if (sortType === col) {
+      if (sortOrder === 'ASC') setSortOrder('DESC')
+      else setSortOrder('ASC')
+    } else {
+      setSortType(col)
+      setSortOrder('ASC')
+    }
+    setSortEffect(true)
+  }
 
   return (
     <div className="tableDiv">
       <h2>{ id === 'noId' ? 'View All Students' : `Student: ${id}`}</h2>
       { id === 'noId' && filter}
       <table className="tbl">
-        {header(headerCols)}
+        <thead className="table-header">
+          <tr key="headers">
+            {headerCols.map((col) => (
+              <td key={col.label}>
+                <button className="headerButton" onClick={() => setSort(col.accesor)} type="button">
+                  {col.label}
+                  {sortType === col.accesor ? <img src={sortOrder === 'ASC' ? 'up_arrow.png' : 'down_arrow.png'} alt="Sort Arrow" />
+                    : <img src="default.png" alt="Sort Arrow" />}
+                </button>
+
+              </td>
+            ))}
+          </tr>
+        </thead>
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
-            <tr key={data.studentId}>
+            <tr className={editingRow === data.studentId ? 'editRow' : 'regRow'} key={data.studentId} onClick={() => {}}>
               {Object.entries(data).map(([prop, value]) => (
-                <td key={prop} contentEditable={data.studentId === editingRow && prop !== 'studentId'} onBlur={(e) => { doOnBlur(e, prop, data) }}>
+                <td
+                  key={prop}
+                  className={prop === 'studentId' ? 'studentIdTd' : 'regularTd'}
+                  contentEditable={data.studentId === editingRow && prop !== 'studentId'}
+                  onDoubleClick={() => { setEditingRow(data.studentId) }}
+                  onBlur={(e) => { if (prop !== 'studentId') updateRow(e.target.innerHTML, data, prop) }}
+                >
                   {prop !== 'studentId' ? value : LinkButton(prop, value, 'student')}
                 </td>
               ))}
-              <td key="edit">
+              <td className="editDeleteTd" key="edit-delete">
                 <button className="tableButtonEdit" type="button" onClick={() => { setEditingRow(data.studentId) }}>
                   Edit
                 </button>
-              </td>
-              <td key="delete">
                 <button className="tableButtonDelete" type="button" onClick={() => { removeRow(data.studentId) }}>
                   Delete
                 </button>

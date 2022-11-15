@@ -8,7 +8,7 @@ import MyCourseTable from '../Table/MyCourseTable'
 import Course from '../Individual/Course'
 import MyEnrollmentTable from '../Table/MyEnrollmentTable'
 import Layout from '../Layout/Layout'
-import NoPage from '../NoPage'
+import NoPage from '../NoPage/NoPage'
 import Home from '../Home/Home'
 import './main.scss'
 
