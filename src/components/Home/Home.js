@@ -11,19 +11,19 @@ export default function Home() {
       <div className="homeDiv">
         <Link to="/students" style={{ textDecoration: 'none' }}>
           <button type="button" className="homeButton">
-            <img className="icon" src="studentsIcon.png" alt="Students Icon" />
+            <img className="icon" src="\.\studentsIcon.png" alt="Students Icon" />
             Students
           </button>
         </Link>
         <Link to="/courses" style={{ textDecoration: 'none' }}>
           <button type="button" className="homeButton">
-            <img className="icon" src="coursesIcon.png" alt="Courses Icon" />
+            <img className="icon" src="\.\coursesIcon.png" alt="Courses Icon" />
             Courses
           </button>
         </Link>
         <Link to="/enrollment" style={{ textDecoration: 'none' }}>
           <button type="button" className="homeButton">
-            <img className="icon" src="enrollmentIcon.png" alt="Enrollment Icon" />
+            <img className="icon" src="\.\enrollmentIcon.png" alt="Enrollment Icon" />
             Enrollment
           </button>
         </Link>

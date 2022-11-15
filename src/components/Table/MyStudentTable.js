@@ -274,14 +274,16 @@ export default function MyTable({ id }) {
     </tr>
   )
   const setSort = (col) => {
-    if (sortType === col) {
-      if (sortOrder === 'ASC') setSortOrder('DESC')
-      else setSortOrder('ASC')
-    } else {
-      setSortType(col)
-      setSortOrder('ASC')
+    if (mainData !== 'error') {
+      if (sortType === col) {
+        if (sortOrder === 'ASC') setSortOrder('DESC')
+        else setSortOrder('ASC')
+      } else {
+        setSortType(col)
+        setSortOrder('ASC')
+      }
+      setSortEffect(true)
     }
-    setSortEffect(true)
   }
 
   return (
@@ -293,12 +295,14 @@ export default function MyTable({ id }) {
           <tr key="headers">
             {headerCols.map((col) => (
               <td key={col.label}>
-                <button className="headerButton" onClick={() => setSort(col.accesor)} type="button">
-                  {col.label}
-                  {sortType === col.accesor ? <img src={sortOrder === 'ASC' ? 'up_arrow.png' : 'down_arrow.png'} alt="Sort Arrow" />
-                    : <img src="default.png" alt="Sort Arrow" />}
-                </button>
-
+                {id === 'noId' ? (
+                  <button className="headerButton" onClick={() => setSort(col.accesor)} type="button">
+                    {col.label}
+                    {sortType === col.accesor ? <img src={sortOrder === 'ASC' ? '\\.\\up_arrow.png' : '\\.\\down_arrow.png'} alt="Sort Arrow" />
+                      : <img src="\.\default.png" alt="Sort Arrow" />}
+                  </button>
+                )
+                  : col.label}
               </td>
             ))}
           </tr>

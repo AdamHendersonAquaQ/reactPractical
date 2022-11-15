@@ -14,7 +14,7 @@ import './main.scss'
 
 function Main() {
   return (
-    <>
+    <div className="mainDiv">
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -30,7 +30,7 @@ function Main() {
       </BrowserRouter>
       <br />
       <br />
-    </>
+    </div>
   )
 }
 

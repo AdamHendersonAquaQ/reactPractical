@@ -28,7 +28,7 @@ export default function Layout() {
     <>
       <h1 className="title">
         <Link to="/" style={{ textDecoration: 'none' }}>
-          <img className="logo" src="segaLogo.png" alt="Sega Logo" />
+          <img className="logo" src="\.\segaLogo.png" alt="Sega Logo" />
           Student Enrollment Service
         </Link>
       </h1>
