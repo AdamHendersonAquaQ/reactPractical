@@ -4,7 +4,7 @@ import './Home.scss'
 
 export default function Home() {
   return (
-    <>
+    <div className="homePageDiv">
       <h1 className="welcomeHeader">
         Welcome to the SEGA Student Enrollment Service!
       </h1>
@@ -28,6 +28,6 @@ export default function Home() {
           </button>
         </Link>
       </div>
-    </>
+    </div>
   )
 }

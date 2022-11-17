@@ -2,25 +2,27 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { string } from 'prop-types'
-import header from './Shared/Header'
 import errorDiv from './Shared/Error'
 import LinkButton from './Shared/LinkButton'
 import './MyTable.scss'
 
 export default function MyTable({ id }) {
   const headerCols = [
-    'ID',
-    'Course Name',
-    'Subject Area',
-    'Credit Amount',
-    'Student Capacity',
-    'Semester Code',
-    'Edit',
-    'Delete'
+    { label: 'ID', accesor: 'courseId' },
+    { label: 'Course Name', accesor: 'courseName' },
+    { label: 'Subject Area', accesor: 'subjectArea' },
+    { label: 'Credit Amount', accesor: 'creditAmount' },
+    { label: 'Student Capacity', accesor: 'studentCapacity' },
+    { label: 'Semester Code', accesor: 'semesterCode' }
   ]
 
   const [mainData, setMainData] = useState([])
   const [editingRow, setEditingRow] = useState([])
+  const [runEffect, setRunEffect] = useState(false)
+
+  const [sortType, setSortType] = useState('courseId')
+  const [sortOrder, setSortOrder] = useState('ASC')
+  const [sortEffect, setSortEffect] = useState(false)
 
   const siteCode = 'course/'
   const [filterCode, setFilterCode] = useState('')
@@ -30,7 +32,6 @@ export default function MyTable({ id }) {
   const [entry1, setEntry1] = useState('')
   const [semesterEntry, setSemesterEntry] = useState('')
 
-  const [runEffect, setRunEffect] = useState(false)
   const [searchError, setSearchError] = useState('')
   const [inputError, setInputError] = useState('')
   const [dataError, setDataError] = useState('')
@@ -81,12 +82,29 @@ export default function MyTable({ id }) {
             setMainData('error')
             setDataError(data.message)
           } else {
-            setMainData(data)
+            const sorted = [...Object.entries(data)]
+              .sort((a, b) => a[1].courseId.toString().localeCompare(b[1].courseId.toString()))
+              .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+            const objSorted = []
+            sorted.forEach((item) => {
+              [, objSorted[sorted.indexOf(item)]] = item
+            })
+            setMainData(objSorted)
             setDataError('')
           }
         })
+    } else if (sortEffect) {
+      setSortEffect(false)
+      const sorted = [...Object.entries(mainData)]
+        .sort((a, b) => a[1].courseId.toString().localeCompare(b[1].courseId.toString()))
+        .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      const objSorted = []
+      sorted.forEach((item) => {
+        [, objSorted[sorted.indexOf(item)]] = item
+      })
+      setMainData(objSorted)
     }
-  }, [mainData.length, runEffect, myUrl, filterCode, id])
+  }, [mainData, runEffect, myUrl, filterCode, id, sortType, sortOrder, sortEffect])
 
   const removeRow = (rowData) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
@@ -113,26 +131,31 @@ export default function MyTable({ id }) {
 
   const updateRow = (value, rowData, field) => {
     const rowToUpdate = mainData.filter((row) => (row.courseId === rowData.courseId))
-    console.log('value: ', value)
-    console.log('field: ', field)
     previous.current = rowToUpdate[0][field]
-    rowToUpdate[0][field] = value
-    console.log(rowToUpdate[0])
-    fetch(`${myUrl}update/`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(rowToUpdate[0])
-    }).then((response) => {
-      if (!response.ok) {
+    if (String(previous.current) !== String(value)) {
+      if (window.confirm('Are you sure you want to make these changes?')) {
+        rowToUpdate[0][field] = value
+        console.log(rowToUpdate[0])
+        fetch(`${myUrl}update/`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify(rowToUpdate[0])
+        }).then((response) => {
+          if (!response.ok) {
+            rowToUpdate[0][field] = `${previous.current} `
+            window.alert('Update failed')
+          }
+          console.log(response)
+          setEditingRow([])
+        })
+      } else {
+        setEditingRow([])
         rowToUpdate[0][field] = `${previous.current} `
-        window.alert('Update failed')
       }
-      console.log(response)
-      setEditingRow([])
-    })
+    } else setEditingRow([])
   }
 
   const register = () => {
@@ -187,19 +210,20 @@ export default function MyTable({ id }) {
       setSearchError('Error: Must give ID and Semester Code.')
     } else clearData()
   }
-  const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
-
-  const doOnBlur = (event, prop, data) => {
-    if (prop !== 'courseId') {
-      const rowToUpdate = mainData.filter((row) => (row.courseId === data.courseId))
-      previous.current = rowToUpdate[0][prop]
-      if (window.confirm('Are you sure you want to make these changes?')) updateRow(event.target.innerHTML, data, prop)
-      else {
-        setEditingRow([])
-        rowToUpdate[0][prop] = `${previous.current} `
+  const setSort = (col) => {
+    if (mainData !== 'error') {
+      if (sortType === col) {
+        if (sortOrder === 'ASC') setSortOrder('DESC')
+        else setSortOrder('ASC')
+      } else {
+        setSortType(col)
+        setSortOrder('ASC')
       }
+      setSortEffect(true)
     }
   }
+  const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
+
   const filter = (
     <div className="filterDiv">
       <div className="selectDiv">
@@ -207,8 +231,8 @@ export default function MyTable({ id }) {
         <select className="filterSelect" value={myFilter} onChange={filterChange}>
           <option value="id">Id</option>
           <option value="name">Name</option>
-          <option value="semester">Semester Code</option>
           <option value="subject">Subject Area</option>
+          <option value="semester">Semester Code</option>
           <option value="studentId">Student Semester</option>
         </select>
       </div>
@@ -279,7 +303,9 @@ export default function MyTable({ id }) {
       <td>
         <input size="1" key="semesterCode" className="rowInput" type="text" value={inputSemesterCode} onChange={(e) => setSemCode(e.target.value)} />
       </td>
-      <td key="register"><button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>Register</button></td>
+      <td className="editDeleteTd" key="register">
+        <button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>Register</button>
+      </td>
     </>
   )
   const getInputClassname = () => {
@@ -316,19 +342,39 @@ export default function MyTable({ id }) {
       <h2>{ id === 'noId' ? 'View All Courses' : `Course: ${id}`}</h2>
       { id === 'noId' && filter}
       <table className="tbl">
-        {header(headerCols)}
+        <thead className="table-header">
+          <tr key="headers">
+            {headerCols.map((col) => (
+              <td key={col.label}>
+                {id === 'noId' ? (
+                  <button className="headerButton" onClick={() => setSort(col.accesor)} type="button">
+                    {col.label}
+                    {sortType === col.accesor ? <img src={sortOrder === 'ASC' ? '\\.\\up_arrow.png' : '\\.\\down_arrow.png'} alt="Sort Arrow" />
+                      : <img src="\.\default.png" alt="Sort Arrow" />}
+                  </button>
+                )
+                  : col.label}
+              </td>
+            ))}
+          </tr>
+        </thead>
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
             <tr key={data.courseId}>
               {Object.entries(data).map(([prop, value]) => (
-                <td key={prop} contentEditable={(data.courseId === editingRow && prop !== 'courseId')} onBlur={(e) => { doOnBlur(e, prop, data) }}>
+                <td
+                  key={prop}
+                  className={prop === 'courseId' ? 'studentIdTd' : 'regularTd'}
+                  contentEditable={(data.courseId === editingRow && prop !== 'courseId')}
+                  suppressContentEditableWarning="true"
+                  onDoubleClick={() => { setEditingRow(data.studentId) }}
+                  onBlur={(e) => { if (prop !== 'courseId') updateRow(e.target.innerHTML, data, prop) }}
+                >
                   {prop !== 'courseId' ? value : LinkButton(prop, value, 'course')}
                 </td>
               ))}
-              <td key="edit">
+              <td className="editDeleteTd" key="edit">
                 <button className="tableButtonEdit" type="button" onClick={() => { setEditingRow(data.courseId) }}>Edit</button>
-              </td>
-              <td key="delete">
                 <button className="tableButtonDelete" type="button" onClick={() => { removeRow(data.courseId) }}>Delete</button>
               </td>
             </tr>

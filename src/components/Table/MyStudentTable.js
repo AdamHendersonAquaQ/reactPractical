@@ -316,6 +316,7 @@ export default function MyTable({ id }) {
                   key={prop}
                   className={prop === 'studentId' ? 'studentIdTd' : 'regularTd'}
                   contentEditable={data.studentId === editingRow && prop !== 'studentId'}
+                  suppressContentEditableWarning="true"
                   onDoubleClick={() => { setEditingRow(data.studentId) }}
                   onBlur={(e) => { if (prop !== 'studentId') updateRow(e.target.innerHTML, data, prop) }}
                 >
