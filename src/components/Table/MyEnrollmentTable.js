@@ -62,7 +62,7 @@ export default function MyTable({ id }) {
         fetch(myUrl)
           .then((response) => response.json())
           .then((data) => {
-            console.log('data recieved: ', data)
+            console.log('Enrollment data recieved: ', data)
             if (Object.hasOwn(data, 'status')) {
               setMainData('error')
               setDataError(data.message)
@@ -82,7 +82,7 @@ export default function MyTable({ id }) {
         fetch(myStudentUrl)
           .then((response) => response.json())
           .then((data) => {
-            console.log('student data recieved: ', data)
+            console.log('Student data recieved: ', data)
             if (Object.hasOwn(data, 'status')) {
               setStudentData('error')
             } else {
@@ -99,7 +99,7 @@ export default function MyTable({ id }) {
       fetch(url)
         .then((response) => response.json())
         .then((data) => {
-          console.log('data recieved: ', data)
+          console.log('Enrollment data recieved: ', data)
           if (Object.hasOwn(data, 'status')) {
             setMainData('error')
             setDataError(data.message)
@@ -114,7 +114,7 @@ export default function MyTable({ id }) {
       fetch(myCourseUrl)
         .then((response) => response.json())
         .then((data) => {
-          console.log('course data recieved: ', data)
+          console.log('Course data recieved: ', data)
           if (Object.hasOwn(data, 'status')) setCourseData('error')
           else setCourseData(data)
         })
@@ -179,7 +179,7 @@ export default function MyTable({ id }) {
         }
       }).then((response) => response.json())
         .then((data) => {
-          console.log('data received: ', data)
+          console.log('Register data received: ', data)
           setInputError(data.message)
         })
         .catch((error) => {

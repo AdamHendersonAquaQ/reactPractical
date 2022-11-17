@@ -77,7 +77,7 @@ export default function MyTable({ id }) {
       fetch((id === 'noId') ? myUrl : `http://localhost:8080/api/${siteCode}id/${id}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log('data recieved: ', data)
+          console.log('Course data recieved: ', data)
           if (Object.hasOwn(data, 'status')) {
             setMainData('error')
             setDataError(data.message)
@@ -143,14 +143,18 @@ export default function MyTable({ id }) {
             'Access-Control-Allow-Origin': '*'
           },
           body: JSON.stringify(rowToUpdate[0])
-        }).then((response) => {
-          if (!response.ok) {
-            rowToUpdate[0][field] = `${previous.current} `
-            window.alert('Update failed')
-          }
-          console.log(response)
-          setEditingRow([])
-        })
+        }).then((response) => response.json())
+          .then((data) => {
+            if (data.status !== 200) {
+              rowToUpdate[0][field] = `${previous.current} `
+              window.alert(`Update failed: ${data.message}`)
+            }
+            console.log(data)
+            setEditingRow([])
+          }).catch(() => {
+            console.log('Update successful')
+            setEditingRow([])
+          })
       } else {
         setEditingRow([])
         rowToUpdate[0][field] = `${previous.current} `
@@ -175,7 +179,7 @@ export default function MyTable({ id }) {
         body: JSON.stringify(jsonData)
       }).then((response) => response.json())
         .then((data) => {
-          console.log('data received: ', data)
+          console.log('Register data: ', data)
           if (!Object.hasOwn(data, 'message')) {
             setRunEffect(true)
             setCourseName('')
@@ -360,14 +364,14 @@ export default function MyTable({ id }) {
         </thead>
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
-            <tr key={data.courseId}>
+            <tr className={editingRow === data.courseId ? 'editRow' : 'regRow'} key={data.courseId}>
               {Object.entries(data).map(([prop, value]) => (
                 <td
                   key={prop}
                   className={prop === 'courseId' ? 'studentIdTd' : 'regularTd'}
                   contentEditable={(data.courseId === editingRow && prop !== 'courseId')}
                   suppressContentEditableWarning="true"
-                  onDoubleClick={() => { setEditingRow(data.studentId) }}
+                  onDoubleClick={() => { setEditingRow(data.courseId) }}
                   onBlur={(e) => { if (prop !== 'courseId') updateRow(e.target.innerHTML, data, prop) }}
                 >
                   {prop !== 'courseId' ? value : LinkButton(prop, value, 'course')}

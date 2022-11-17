@@ -60,7 +60,7 @@ export default function MyTable({ id }) {
       fetch((id === 'noId') ? myUrl : `http://localhost:8080/api/${siteCode}id/${id}`)
         .then((response) => response.json())
         .then((data) => {
-          console.log('data recieved: ', data)
+          console.log('Student Data recieved: ', data)
           if (Object.hasOwn(data, 'status')) {
             setMainData('error')
             setDataError(data.message)
@@ -126,14 +126,18 @@ export default function MyTable({ id }) {
             'Access-Control-Allow-Origin': '*'
           },
           body: JSON.stringify(rowToUpdate[0])
-        }).then((response) => {
-          if (!response.ok) {
-            rowToUpdate[0][field] = `${previous.current} `
-            window.alert('Update failed')
-          }
-          console.log(response)
-          setEditingRow([])
-        })
+        }).then((response) => response.json())
+          .then((data) => {
+            if (data.status !== 200) {
+              rowToUpdate[0][field] = `${previous.current} `
+              window.alert(`Update failed: ${data.message}`)
+            }
+            console.log(data)
+            setEditingRow([])
+          }).catch(() => {
+            console.log('Update successful')
+            setEditingRow([])
+          })
       } else {
         setEditingRow([])
         rowToUpdate[0][field] = `${previous.current} `
@@ -179,7 +183,7 @@ export default function MyTable({ id }) {
       }).then((response) => response.json())
         .then((data) => {
           if (!Object.hasOwn(data, 'message')) {
-            console.log('data received: ', data)
+            console.log('Register data: ', data)
             setRunEffect(true)
             setFirstName('')
             setLastName('')
@@ -310,7 +314,7 @@ export default function MyTable({ id }) {
         </thead>
         <tbody className="table-content">
           { (mainData !== 'error') && mainData.map((data) => (
-            <tr className={editingRow === data.studentId ? 'editRow' : 'regRow'} key={data.studentId} onClick={() => {}}>
+            <tr className={editingRow === data.studentId ? 'editRow' : 'regRow'} key={data.studentId}>
               {Object.entries(data).map(([prop, value]) => (
                 <td
                   key={prop}
