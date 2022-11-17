@@ -82,9 +82,16 @@ export default function MyTable({ id }) {
             setMainData('error')
             setDataError(data.message)
           } else {
-            const sorted = [...Object.entries(data)]
-              .sort((a, b) => a[1].courseId.toString().localeCompare(b[1].courseId.toString()))
-              .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+            let sorted = []
+            if (sortType.slice(-2) === 'Id' || sortType === 'creditAmount' || sortType === 'studentCapacity') {
+              sorted = [...Object.entries(data)]
+                .sort((a, b) => a[1].studentId - b[1].studentId)
+                .sort((a, b) => a[1][sortType] - b[1][sortType] * (sortOrder === 'ASC' ? 1 : -1))
+            } else {
+              sorted = [...Object.entries(data)]
+                .sort((a, b) => a[1].studentId - b[1].studentId)
+                .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+            }
             const objSorted = []
             sorted.forEach((item) => {
               [, objSorted[sorted.indexOf(item)]] = item
@@ -95,9 +102,16 @@ export default function MyTable({ id }) {
         })
     } else if (sortEffect) {
       setSortEffect(false)
-      const sorted = [...Object.entries(mainData)]
-        .sort((a, b) => a[1].courseId.toString().localeCompare(b[1].courseId.toString()))
-        .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      let sorted = []
+      if (sortType.slice(-2) === 'Id' || sortType === 'creditAmount' || sortType === 'studentCapacity') {
+        sorted = [...Object.entries(mainData)]
+          .sort((a, b) => a[1].studentId - b[1].studentId)
+          .sort((a, b) => a[1][sortType] - b[1][sortType] * (sortOrder === 'ASC' ? 1 : -1))
+      } else {
+        sorted = [...Object.entries(mainData)]
+          .sort((a, b) => a[1].studentId - b[1].studentId)
+          .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      }
       const objSorted = []
       sorted.forEach((item) => {
         [, objSorted[sorted.indexOf(item)]] = item
