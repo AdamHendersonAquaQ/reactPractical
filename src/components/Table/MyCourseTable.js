@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { string } from 'prop-types'
 import errorDiv from './Shared/Error'
 import LinkButton from './Shared/LinkButton'
+import NavButton from './Shared/NavButton'
 import './MyTable.scss'
 
 export default function MyTable({ id }) {
@@ -18,7 +19,7 @@ export default function MyTable({ id }) {
 
   const [mainData, setMainData] = useState([])
   const [editingRow, setEditingRow] = useState([])
-  const [runEffect, setRunEffect] = useState(false)
+  const [runEffect, setRunEffect] = useState(true)
 
   const [sortType, setSortType] = useState('courseId')
   const [sortOrder, setSortOrder] = useState('ASC')
@@ -46,6 +47,8 @@ export default function MyTable({ id }) {
   const [showInput, setShowInput] = useState(false)
   const previous = useRef('')
 
+  const [semData, setSemData] = useState([])
+
   const navigate = useNavigate()
 
   const clearData = () => {
@@ -72,7 +75,7 @@ export default function MyTable({ id }) {
     setSemesterEntry(event.target.value)
   }
   useEffect(() => {
-    if (mainData.length === 0 || runEffect) {
+    if (runEffect) {
       setRunEffect(false)
       fetch((id === 'noId') ? myUrl : `http://localhost:8080/api/${siteCode}id/${id}`)
         .then((response) => response.json())
@@ -96,29 +99,51 @@ export default function MyTable({ id }) {
             sorted.forEach((item) => {
               [, objSorted[sorted.indexOf(item)]] = item
             })
-            setMainData(objSorted)
-            setDataError('')
+            fetch(`http://localhost:8080/api/${siteCode}capacity`)
+              .then((response) => response.json())
+              .then((caps) => {
+                console.log('Capacity data recieved: ', caps)
+                caps.forEach((x) => {
+                  objSorted.forEach((y, i) => {
+                    if (y.courseId === x.courseId) { objSorted[i].studentCapacity = `${x.capacityCount}/${y.studentCapacity}` }
+                  })
+                })
+                setMainData(objSorted)
+                setDataError('')
+              })
+            if (myFilter === 'semester') {
+              data.forEach((x) => { if (!semData.includes(x.semesterCode))semData.push(x.semesterCode) })
+            } else setSemData([])
           }
         })
     } else if (sortEffect) {
-      setSortEffect(false)
-      let sorted = []
-      if (sortType.slice(-2) === 'Id' || sortType === 'creditAmount' || sortType === 'studentCapacity') {
-        sorted = [...Object.entries(mainData)]
-          .sort((a, b) => a[1].studentId - b[1].studentId)
-          .sort((a, b) => a[1][sortType] - b[1][sortType] * (sortOrder === 'ASC' ? 1 : -1))
-      } else {
-        sorted = [...Object.entries(mainData)]
-          .sort((a, b) => a[1].studentId - b[1].studentId)
-          .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      if (mainData.length !== 0) {
+        setSortEffect(false)
+        let sorted = []
+        if (sortType.slice(-2) === 'Id' || sortType === 'creditAmount') {
+          sorted = [...Object.entries(mainData)]
+            .sort((a, b) => a[1].studentId - b[1].studentId)
+            .sort((a, b) => (a[1][sortType] - b[1][sortType]) * (sortOrder === 'ASC' ? 1 : -1))
+        } else if (sortType === 'studentCapacity') {
+          sorted = [...Object.entries(mainData)]
+            .sort((a, b) => a[1].studentId - b[1].studentId)
+            .sort(
+              (a, b) => (parseInt(a[1].studentCapacity.toString().split('/')[1], 10) - parseInt(b[1].studentCapacity.toString().split('/')[1], 10))
+              * (sortOrder === 'ASC' ? 1 : -1)
+            )
+        } else {
+          sorted = [...Object.entries(mainData)]
+            .sort((a, b) => a[1].studentId - b[1].studentId)
+            .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+        }
+        const objSorted = []
+        sorted.forEach((item) => {
+          [, objSorted[sorted.indexOf(item)]] = item
+        })
+        setMainData(objSorted)
       }
-      const objSorted = []
-      sorted.forEach((item) => {
-        [, objSorted[sorted.indexOf(item)]] = item
-      })
-      setMainData(objSorted)
-    }
-  }, [mainData, runEffect, myUrl, filterCode, id, sortType, sortOrder, sortEffect])
+    } else if (mainData.length === 0) setSortEffect(true)
+  }, [mainData, runEffect, myUrl, filterCode, id, sortType, sortOrder, sortEffect, myFilter, semData])
 
   const removeRow = (rowData) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
@@ -133,7 +158,7 @@ export default function MyTable({ id }) {
       }).then((response) => {
         console.log('response received: ', response)
         if (response.ok) {
-          setMainData(mainData.filter((row) => (row.studentId === rowData)))
+          setMainData(mainData.filter((row) => (row.courseId !== rowData)))
           if (id !== 'noId') navigate('/courses')
         } else {
           console.log('Row not removed')
@@ -146,7 +171,10 @@ export default function MyTable({ id }) {
   const updateRow = (value, rowData, field) => {
     const rowToUpdate = mainData.filter((row) => (row.courseId === rowData.courseId))
     previous.current = rowToUpdate[0][field]
-    if (String(previous.current) !== String(value)) {
+    if (field === 'studentCapacity' && (String(previous.current.toString().split('/')[1]) === String(value))) {
+      setEditingRow([])
+      rowToUpdate[0][field] = `${previous.current} `
+    } else if ((String(previous.current) !== String(value))) {
       if (window.confirm('Are you sure you want to make these changes?')) {
         rowToUpdate[0][field] = value
         console.log(rowToUpdate[0])
@@ -166,6 +194,7 @@ export default function MyTable({ id }) {
             console.log(data)
             setEditingRow([])
           }).catch(() => {
+            if (field === 'studentCapacity') rowToUpdate[0][field] = `${previous.current.toString().split('/')[0]}/${rowToUpdate[0][field]}`
             console.log('Update successful')
             setEditingRow([])
           })
@@ -257,15 +286,23 @@ export default function MyTable({ id }) {
       <div className="inputDiv" style={{ display: 'flex', flexDirection: 'row' }}>
         <div className="input1">
           {`Enter ${myFilter[0].toUpperCase() + myFilter.substring(1)}:`}
-          <input
-            type="text"
-            className="inputEntry"
-            name="entry1"
-            value={entry1}
-            onClick={() => setEntry1('')}
-            onChange={textChange}
-            onKeyPress={handleKeypress}
-          />
+          {myFilter !== 'semester' ? (
+            <input
+              type="text"
+              className="inputEntry"
+              name="entry1"
+              value={entry1}
+              onClick={() => setEntry1('')}
+              onChange={textChange}
+              onKeyPress={handleKeypress}
+            />
+          )
+            : (
+              <select className="filterSelect" value={entry1} onChange={(e) => { setEntry1(e.target.value) }}>
+                <option key="blank" value=""> </option>
+                {semData.map((data) => (<option key={data} value={data}>{data}</option>))}
+              </select>
+            )}
         </div>
         {myFilter === 'studentId' && (
           <div className="input2">
@@ -288,16 +325,15 @@ export default function MyTable({ id }) {
   )
   const inputFields = (
     <>
-      <td>
-        <input size="1" key="courseName" className="rowInput" type="text" value={inputCourseName} onChange={(e) => setCourseName(e.target.value)} />
+      <td key="courseName">
+        <input size="1" className="rowInput" type="text" value={inputCourseName} onChange={(e) => setCourseName(e.target.value)} />
       </td>
-      <td>
-        <input size="1" key="subjArea" className="rowInput" type="text" value={inputSubjectArea} onChange={(e) => setSubjectArea(e.target.value)} />
+      <td key="subjArea">
+        <input size="1" className="rowInput" type="text" value={inputSubjectArea} onChange={(e) => setSubjectArea(e.target.value)} />
       </td>
-      <td>
+      <td key="creditAmount">
         <input
           size="1"
-          key="creditAmount"
           className="rowInput"
           type="number"
           min="0"
@@ -306,10 +342,9 @@ export default function MyTable({ id }) {
           onChange={(e) => setCreditAmount(e.target.value)}
         />
       </td>
-      <td>
+      <td key="studentCapacity">
         <input
           size="1"
-          key="studentCapacity"
           className="rowInput"
           type="number"
           min="0"
@@ -318,8 +353,8 @@ export default function MyTable({ id }) {
           onChange={(e) => setStudentCapacity(e.target.value)}
         />
       </td>
-      <td>
-        <input size="1" key="semesterCode" className="rowInput" type="text" value={inputSemesterCode} onChange={(e) => setSemCode(e.target.value)} />
+      <td key="semesterCode">
+        <input size="1" className="rowInput" type="text" value={inputSemesterCode} onChange={(e) => setSemCode(e.target.value)} />
       </td>
       <td className="editDeleteTd" key="register">
         <button size="1" className="tableButtonRegister" type="submit" onClick={() => { register() }}>Register</button>
@@ -355,9 +390,13 @@ export default function MyTable({ id }) {
       {showInput && inputFields}
     </tr>
   )
+  const adjustCapacity = (data, prop, value) => (
+    (editingRow === data.courseId && prop === 'studentCapacity') ? value.toString().split('/')[1] : value
+  )
   return (
     <div className="tableDiv">
       <h2>{ id === 'noId' ? 'View All Courses' : `Course: ${id}`}</h2>
+      {id === 'noId' && NavButton(true)}
       { id === 'noId' && filter}
       <table className="tbl">
         <thead className="table-header">
@@ -388,7 +427,7 @@ export default function MyTable({ id }) {
                   onDoubleClick={() => { setEditingRow(data.courseId) }}
                   onBlur={(e) => { if (prop !== 'courseId') updateRow(e.target.innerHTML, data, prop) }}
                 >
-                  {prop !== 'courseId' ? value : LinkButton(prop, value, 'course')}
+                  {prop !== 'courseId' ? adjustCapacity(data, prop, value) : LinkButton(prop, value, 'course')}
                 </td>
               ))}
               <td className="editDeleteTd" key="edit">
@@ -402,6 +441,7 @@ export default function MyTable({ id }) {
       </table>
       {errorDiv(inputError)}
       {errorDiv(dataError)}
+      {id === 'noId' && NavButton(false)}
     </div>
   )
 }

@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { string } from 'prop-types'
 import errorDiv from './Shared/Error'
 import LinkButton from './Shared/LinkButton'
+import NavButton from './Shared/NavButton'
 import './MyTable.scss'
 
 export default function MyTable({ id }) {
@@ -131,7 +132,7 @@ export default function MyTable({ id }) {
       if (sortType.slice(-2) === 'Id') {
         sorted = [...Object.entries(mainData)]
           .sort((a, b) => a[1].studentId - b[1].studentId)
-          .sort((a, b) => a[1][sortType] - b[1][sortType] * (sortOrder === 'ASC' ? 1 : -1))
+          .sort((a, b) => (a[1][sortType] - b[1][sortType]) * (sortOrder === 'ASC' ? 1 : -1))
       } else {
         sorted = [...Object.entries(mainData)]
           .sort((a, b) => a[1].studentId - b[1].studentId)
@@ -301,9 +302,11 @@ export default function MyTable({ id }) {
       <td key="add"><button type="button" className="tableButtonMax" onClick={() => setShowInput(!showInput)}>+</button></td>
     </tr>
   )
+
   return (
     <div className="tableDiv">
       <h2>Enrollment Details</h2>
+      {NavButton(true)}
       {filter}
       <table className="tbl">
         <thead className="table-header">
@@ -341,6 +344,7 @@ export default function MyTable({ id }) {
       </table>
       {errorDiv(inputError)}
       {errorDiv(dataError)}
+      {NavButton(false)}
     </div>
   )
 }

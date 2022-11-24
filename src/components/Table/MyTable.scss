@@ -56,6 +56,24 @@ $table-button-colour: rgba(34, 57, 184, 0.247);
   width: 100%;
   border: 0px;
 }
+.navHeaderDiv{
+  width: 100%;
+  display: flex;
+  justify-content:flex-end;
+}
+.navigateButton, .navigateButton:hover{
+  width: 45px;
+  margin-right: 20px;
+  background-color: rgb(184, 215, 255);
+  border: 2px solid rgb(109, 184, 255);
+  border-radius: 10px;
+}
+.navigateButton:hover{
+  background-color: rgb(146, 193, 255);
+}
+.navImage{
+  width: 100%;
+}
 tbody tr {
   background-color: $content-colour; 
 }

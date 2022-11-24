@@ -5,6 +5,7 @@ import { string } from 'prop-types'
 import errorDiv from './Shared/Error'
 import './MyTable.scss'
 import LinkButton from './Shared/LinkButton'
+import NavButton from './Shared/NavButton'
 
 export default function MyTable({ id }) {
   const headerCols = [
@@ -15,7 +16,7 @@ export default function MyTable({ id }) {
   ]
   const [mainData, setMainData] = useState([])
   const [editingRow, setEditingRow] = useState([])
-  const [runEffect, setRunEffect] = useState(false)
+  const [runEffect, setRunEffect] = useState(true)
 
   const [sortType, setSortType] = useState('studentId')
   const [sortOrder, setSortOrder] = useState('ASC')
@@ -55,7 +56,7 @@ export default function MyTable({ id }) {
     setSearchError('')
   }
   useEffect(() => {
-    if (mainData.length === 0 || runEffect) {
+    if (runEffect) {
       setRunEffect(false)
       fetch((id === 'noId') ? myUrl : `http://localhost:8080/api/${siteCode}id/${id}`)
         .then((response) => response.json())
@@ -84,24 +85,26 @@ export default function MyTable({ id }) {
           }
         })
     } else if (sortEffect) {
-      setSortEffect(false)
-      let sorted = []
-      if (sortType === 'studentId' || sortType === 'graduationYear') {
-        sorted = [...Object.entries(mainData)]
-          .sort((a, b) => a[1].studentId - b[1].studentId)
-          .sort((a, b) => a[1][sortType] - b[1][sortType] * (sortOrder === 'ASC' ? 1 : -1))
-      } else {
-        sorted = [...Object.entries(mainData)]
-          .sort((a, b) => a[1].studentId - b[1].studentId)
-          .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+      if (mainData.length !== 0) {
+        setSortEffect(false)
+        let sorted = []
+        if (sortType === 'studentId' || sortType === 'graduationYear') {
+          sorted = [...Object.entries(mainData)]
+            .sort((a, b) => a[1].studentId - b[1].studentId)
+            .sort((a, b) => (a[1][sortType] - b[1][sortType]) * (sortOrder === 'ASC' ? 1 : -1))
+        } else {
+          sorted = [...Object.entries(mainData)]
+            .sort((a, b) => a[1].studentId - b[1].studentId)
+            .sort((a, b) => a[1][sortType].toString().localeCompare(b[1][sortType].toString()) * (sortOrder === 'ASC' ? 1 : -1))
+        }
+        const objSorted = []
+        sorted.forEach((item) => {
+          [, objSorted[sorted.indexOf(item)]] = item
+        })
+        setMainData(objSorted)
       }
-      const objSorted = []
-      sorted.forEach((item) => {
-        [, objSorted[sorted.indexOf(item)]] = item
-      })
-      setMainData(objSorted)
-    }
-  }, [mainData.length, runEffect, myUrl, id, sortType, sortOrder, mainData, sortEffect])
+    } else if (mainData.length === 0) setSortEffect(true)
+  }, [runEffect, myUrl, id, sortType, sortOrder, mainData, sortEffect])
 
   const removeRow = (rowData) => {
     if (window.confirm('Are you sure you want to delete this item?')) {
@@ -308,6 +311,7 @@ export default function MyTable({ id }) {
   return (
     <div className="tableDiv">
       <h2>{ id === 'noId' ? 'View All Students' : `Student: ${id}`}</h2>
+      {id === 'noId' && NavButton(true)}
       { id === 'noId' && filter}
       <table className="tbl">
         <thead className="table-header">
@@ -356,6 +360,7 @@ export default function MyTable({ id }) {
       </table>
       {showInput && errorDiv(inputError)}
       {errorDiv(dataError)}
+      {id === 'noId' && NavButton(false)}
     </div>
   )
 }
