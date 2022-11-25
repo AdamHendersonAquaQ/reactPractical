@@ -8,7 +8,7 @@ export default function NavButton(down) {
   }
   return (
     <div className="navHeaderDiv">
-      { window.innerHeight < document.body.offsetHeight && (
+      { window.innerHeight * 1.5 < document.body.offsetHeight && (
       <button className="navigateButton" type="button" onClick={() => scroll()}>
         <img src={down ? '\\.\\down_arrow.png' : '\\.\\up_arrow.png'} className="navImage" alt="Go to Bottom" />
       </button>

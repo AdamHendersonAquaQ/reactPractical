@@ -220,6 +220,7 @@ export default function MyTable({ id }) {
 
   const filter = (
     <div className="filterDiv">
+    <div className="filterBox">
       <div className="selectDiv">
         Sort by:
         <select className="filterSelect" value={myFilter} onChange={filterChange}>
@@ -257,6 +258,7 @@ export default function MyTable({ id }) {
         )}
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
+      </div>
       {errorDiv(searchError)}
     </div>
   )
@@ -310,8 +312,8 @@ export default function MyTable({ id }) {
 
   return (
     <div className="tableDiv">
-      <h2>{ id === 'noId' ? 'View All Students' : `Student: ${id}`}</h2>
       {id === 'noId' && NavButton(true)}
+      <h2>{ id === 'noId' ? 'View All Students' : `Student: ${id}`}</h2>
       { id === 'noId' && filter}
       <table className="tbl">
         <thead className="table-header">

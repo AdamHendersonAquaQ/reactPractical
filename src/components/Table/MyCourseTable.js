@@ -177,6 +177,11 @@ export default function MyTable({ id }) {
     } else if ((String(previous.current) !== String(value))) {
       if (window.confirm('Are you sure you want to make these changes?')) {
         rowToUpdate[0][field] = value
+        let cap =""
+        if(rowToUpdate[0].studentCapacity.toString().includes('/')) {
+          cap = rowToUpdate[0].studentCapacity.toString().split('/')[0]
+          rowToUpdate[0].studentCapacity=rowToUpdate[0].studentCapacity.toString().split('/')[1]
+        }
         console.log(rowToUpdate[0])
         fetch(`${myUrl}update/`, {
           method: 'PUT',
@@ -194,6 +199,7 @@ export default function MyTable({ id }) {
             console.log(data)
             setEditingRow([])
           }).catch(() => {
+            if(cap!="") rowToUpdate[0].studentCapacity = `${cap}/${rowToUpdate[0].studentCapacity}`
             if (field === 'studentCapacity') rowToUpdate[0][field] = `${previous.current.toString().split('/')[0]}/${rowToUpdate[0][field]}`
             console.log('Update successful')
             setEditingRow([])
@@ -273,6 +279,7 @@ export default function MyTable({ id }) {
 
   const filter = (
     <div className="filterDiv">
+    <div className="filterBox">
       <div className="selectDiv">
         Sort by:
         <select className="filterSelect" value={myFilter} onChange={filterChange}>
@@ -320,8 +327,10 @@ export default function MyTable({ id }) {
         )}
       </div>
       <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
-      {errorDiv(searchError)}
     </div>
+    {errorDiv(searchError)}
+    </div>
+
   )
   const inputFields = (
     <>
@@ -395,8 +404,8 @@ export default function MyTable({ id }) {
   )
   return (
     <div className="tableDiv">
-      <h2>{ id === 'noId' ? 'View All Courses' : `Course: ${id}`}</h2>
       {id === 'noId' && NavButton(true)}
+      <h2>{ id === 'noId' ? 'View All Courses' : `Course: ${id}`}</h2>
       { id === 'noId' && filter}
       <table className="tbl">
         <thead className="table-header">

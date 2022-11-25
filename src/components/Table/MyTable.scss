@@ -62,6 +62,7 @@ $table-button-colour: rgba(34, 57, 184, 0.247);
   justify-content:flex-end;
 }
 .navigateButton, .navigateButton:hover{
+  margin-top: 10px;
   width: 45px;
   margin-right: 20px;
   background-color: rgb(184, 215, 255);
@@ -122,10 +123,9 @@ select{
 }
 
 .filter{
-  &Div{
+  &Box{
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     padding: 10px;
-    margin-bottom: 20px;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -133,6 +133,12 @@ select{
     border: 5px solid rgb(0, 172, 23);
     border-radius: 10px;
     background-color: rgb(179, 255, 148);
+  }
+  &Div{
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
   }
   &Select{
     text-align: center;

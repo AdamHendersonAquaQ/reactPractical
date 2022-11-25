@@ -186,8 +186,8 @@ export default function MyTable({ id }) {
     }
   }
   const register = () => {
-    if ((courseId !== '' && studentId !== '')) {
-      fetch(`${myUrl}?studentId=${studentId}&courseId=${courseId}`, {
+    if ((courseId !== '' && studentId !== '') || (id !== 'noId' && courseId !== '')) {
+      fetch(id === 'noId' ? `${myUrl}?studentId=${studentId}&courseId=${courseId}` : `${myUrl}?studentId=${id}&courseId=${courseId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -212,12 +212,13 @@ export default function MyTable({ id }) {
         })
     } else setInputError('Please select a courseId and studentId')
   }
-  const handleSubmit = () => {
+  const doSearch = (value) => {
+    setEntry1(value)
     setSearchError('')
-    if (entry1 !== '') {
-      if (Number.isNaN(parseInt(entry1, 10))) setSearchError('Error: Id field must be an integer.  ')
+    if (value !== '') {
+      if (Number.isNaN(parseInt(value, 10))) setSearchError('Error: Id field must be an integer.  ')
       else {
-        setFilterCode(`${myFilter}/${entry1}`)
+        setFilterCode(`${myFilter}/${value}`)
         setRunEffect(true)
       }
     } else clearData()
@@ -234,10 +235,10 @@ export default function MyTable({ id }) {
       setSortEffect(true)
     }
   }
-  const handleKeypress = (e) => { if (e.charCode === 13) handleSubmit() }
 
   const filter = (
     <div className="filterDiv">
+    <div className="filterBox">
       <div className="selectDiv">
         Sort by:
         <select className="filterSelect" value={(id !== 'noId') ? 'course' : myFilter} onChange={filterChange} disabled={id !== 'noId'}>
@@ -253,13 +254,12 @@ export default function MyTable({ id }) {
             name="entry1"
             className="inputEntry"
             value={entry1}
-            onClick={() => setEntry1('')}
-            onChange={(e) => setEntry1(e.target.value)}
-            onKeyPress={handleKeypress}
+            onClick={() => {if (entry1 !== '') doSearch('')}}
+            onChange={(e) => doSearch(e.target.value)}
           />
         </div>
       </div>
-      <button className="inputButton" type="button" onClick={handleSubmit}>Search</button>
+      </div>
       {errorDiv(searchError)}
     </div>
   )
@@ -305,8 +305,8 @@ export default function MyTable({ id }) {
 
   return (
     <div className="tableDiv">
+      {id === 'noId' && NavButton(true)}
       <h2>Enrollment Details</h2>
-      {NavButton(true)}
       {filter}
       <table className="tbl">
         <thead className="table-header">
@@ -343,8 +343,8 @@ export default function MyTable({ id }) {
         </tbody>
       </table>
       {errorDiv(inputError)}
-      {errorDiv(dataError)}
-      {NavButton(false)}
+      {!showInput && errorDiv(dataError)}
+      {id === 'noId' && NavButton(false)}
     </div>
   )
 }
